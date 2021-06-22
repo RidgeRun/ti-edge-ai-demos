@@ -27,7 +27,7 @@ class PreProcess:
         # preprocess params
         self.resize = params['preprocess']['resize']
         crop = params['preprocess']['crop']
-        if (type(crop) == int):
+        if (isinstance(crop, int)):
             self.crop = (crop, crop)
         self.mean = params['preprocess']['mean']
         self.scale = params['preprocess']['scale']
@@ -68,3 +68,16 @@ class PreProcess:
         return img
 
     def subtract_mean_and_scale(self, img, mean, scale, chan_axis):
+        for mean, scale, ch in zip(mean, scale, range(img.shape[chan_axis])):
+            if (chan_axis == 0):
+                img[ch, :, :, :] = ((img[ch, :, :, :] - mean) * scale)
+            elif (chan_axis == 1):
+                img[:, ch, :, :] = ((img[:, ch, :, :] - mean) * scale)
+            elif (chan_axis == 2):
+                img[:, :, ch, :] = ((img[:, :, ch, :] - mean) * scale)
+            elif (chan_axis == 3):
+                img[:, :, :, ch] = ((img[:, :, :, ch] - mean) * scale)
+            else:
+                print("[ERROR] Unsupported channel axis")
+
+        return img
