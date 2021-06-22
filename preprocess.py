@@ -41,6 +41,9 @@ class PreProcess:
         return img
 
     def channel_swap_bgr_to_rgb(self, img):
+        img = img[:, :, ::-1]
+
+        return img
 
     def change_format(self, img, fin, fout):
 
