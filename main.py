@@ -15,15 +15,17 @@
 from imagehandler import *
 from preprocess import *
 
+model_dir = "/opt/edge_ai_apps/models/detection/TFL-OD-200-ssd-mobV1-coco-mlperf-300x300/"
+
 
 def main():
     image_handler = ImageHandler()
     img = image_handler.loadImage("linux.jpg")
-    image_handler.saveImage("linux_copy.jpg", img)
 
-    model_dir = "/opt/edge_ai_apps/models/detection/TFL-OD-200-ssd-mobV1-coco-mlperf-300x300/"
     preprocess = PreProcess(img, model_dir)
-#    preprocess.get_preprocessed_image(img)
+    img = preprocess.get_preprocessed_image(img)
+
+    image_handler.saveImage("linux_preprocessed.jpg", img)
 
 
 if __name__ == "__main__":
