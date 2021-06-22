@@ -13,12 +13,17 @@
 #  back to RidgeRun without any encumbrance.
 
 from imagehandler import *
+from preprocess import *
 
 
 def main():
     image_handler = ImageHandler()
     img = image_handler.loadImage("linux.jpg")
     image_handler.saveImage("linux_copy.jpg", img)
+
+    model_dir = "/opt/edge_ai_apps/models/detection/TFL-OD-200-ssd-mobV1-coco-mlperf-300x300/"
+    preprocess = PreProcess(img, model_dir)
+#    preprocess.get_preprocessed_image(img)
 
 
 if __name__ == "__main__":

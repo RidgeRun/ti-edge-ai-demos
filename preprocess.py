@@ -16,23 +16,17 @@ import yaml
 import cv2
 import numpy as np
 
+from getconfig import *
+
 
 class PreProcess:
     def __init__(self, img, model_dir):
-        with open(model_dir + 'param.yaml', 'r') as f:
-            params = yaml.safe_load(f)
+        # Get parsed the model params
+        config = GetConfigYaml(model_dir)
+        self.params = config.params
 
+        # Get the image
         self.img = img
-
-        # preprocess params
-        self.resize = params['preprocess']['resize']
-        crop = params['preprocess']['crop']
-        if (isinstance(crop, int)):
-            self.crop = (crop, crop)
-        self.mean = params['preprocess']['mean']
-        self.scale = params['preprocess']['scale']
-        self.reverse_channels = params['preprocess']['reverse_channels']
-        self.data_layout = params['preprocess']['data_layout']
 
     def resize(self, img, new_width, new_height):
         img = cv2.resize(img, (new_width, new_height),
@@ -80,4 +74,16 @@ class PreProcess:
             else:
                 print("[ERROR] Unsupported channel axis")
 
+        return img
+
+    def get_preprocessed_image(self, img):
+        img = self.resize(img, *self.params.resize)
+        if (not self.params.reverse_channels):
+            img = self.channel_swap_bgr_to_rgb(img)
+        img = self.change_format(img, "HWC", self.params.data_layout)
+        img = self.subtract_mean_and_scale(
+            img,
+            self.params.mean,
+            self.params.scale,
+            self.params.data_layout.index("C"))
         return img
