@@ -35,6 +35,10 @@ class PreProcess:
         self.data_layout = params['preprocess']['data_layout']
 
     def resize(self, img, new_width, new_height):
+        img = cv2.resize(img, (new_width, new_height),
+                         interpolation=cv2.INTER_LINEAR)
+
+        return img
 
     def channel_swap_bgr_to_rgb(self, img):
 
