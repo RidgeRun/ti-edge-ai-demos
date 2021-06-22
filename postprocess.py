@@ -30,3 +30,22 @@ class PostProcess:
         self.demo_name = 'Simple example'
 
     def overlay_title(self, img):
+        (cam_width, cam_height) = (1280, 720)
+        (disp_width, disp_height) = (1920, 1080)
+
+        padx = disp_width - cam_width
+        pady = disp_height - cam_height
+
+        img = cv2.copyMakeBorder(img,
+                                 int(pady / 2),
+                                 pady - int(pady / 2),
+                                 int(padx / 2),
+                                 padx - int(padx / 2),
+                                 cv2.BORDER_CONSTANT)
+        img = cv2.putText(img, "Texas Instruments - Edge Analytics", (40, 40),
+                          cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 255), 2)
+        img = cv2.putText(img, self.demo_name, (40, 40 + 50),
+                          cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        img = cv2.putText(img, "model : " + self.model_name, (40, 40 + 100),
+                          cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        return img
