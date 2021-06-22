@@ -46,5 +46,25 @@ class PreProcess:
         return img
 
     def change_format(self, img, fin, fout):
+        if (fin == 'HWC' and fout == 'NCHW'):
+            transpose = (2, 0, 1)
+            newdim = 0
+        elif (fin == 'HWC' and fout == 'NHWC'):
+            transpose = False
+            newdim = 0
+        elif (fin == 'NCHW' and fout == 'NHWC'):
+            transpose = (0, 2, 3, 1)
+        else:
+            print("[ERROR] Unsupported format conversion from %s to %s" %
+                  (fin, fout))
+            return None
+
+        if (transpose):
+            img = np.transpose(img, transpose)
+        if (newdim is not None):
+            img = np.expand_dims(img, axis=newdim)
+        img = img.astype(np.float32)
+
+        return img
 
     def subtract_mean_and_scale(self, img, mean, scale, chan_axis):
