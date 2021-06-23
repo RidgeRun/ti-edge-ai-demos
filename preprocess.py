@@ -89,6 +89,20 @@ class PreProcess:
         return img
 
 
+class PreProcessDetection(PreProcess):
+    def get_preprocessed_image(self, img):
+        img = self.resize(img, *self.params.resize)
+        if (not self.params.reverse_channels):
+            img = self.channel_swap_bgr_to_rgb(img)
+        img = self.change_format(img, 'HWC', self.params.data_layout)
+        img = self.subtract_mean_and_scale(
+            img,
+            self.params.mean,
+            self.params.scale,
+            self.params.data_layout.index('C'))
+        return img
+
+
 class PreProcessClassification(PreProcess):
     def resize_smaller_dim(self, img, dim):
         orig_height, orig_width, _ = img.shape
