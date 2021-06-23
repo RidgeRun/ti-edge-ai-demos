@@ -14,19 +14,24 @@
 
 import cv2
 import logging
+import sys
 import yaml
 
 
 class GetConfigYaml:
     def __init__(self, model_dir):
         yaml_params = self.read_file(model_dir)
-        self.params = self.parse_params(yaml_params)
+        self.params = self.parse_params(yaml_params, model_dir)
 
     def read_file(self, model_dir):
-        with open(model_dir + "param.yaml", "r") as file:
-            return yaml.safe_load(file)
+        try:
+            with open(model_dir + "param.yaml", "r") as file:
+                return yaml.safe_load(file)
+        except Exception as e:
+            logging.error("YAML file not found")
+            sys.exit(1)
 
-    def parse_params(self, yaml_params):
+    def parse_params(self, yaml_params, model_dir):
         def params(): return None
 
         # Get the preprocess parameters
