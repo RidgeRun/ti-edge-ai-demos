@@ -14,6 +14,8 @@
 
 from imagehandler import *
 from preprocess import *
+from postprocess import *
+from runtimes import *
 
 model_dir = "/opt/edge_ai_apps/models/detection/TFL-OD-200-ssd-mobV1-coco-mlperf-300x300/"
 
@@ -22,8 +24,13 @@ def main():
     image_handler = ImageHandler()
     img = image_handler.loadImage("linux.jpg")
 
-    preprocess = PreProcess(img, model_dir)
+    preprocess = PreProcessDetection(img, model_dir)
     img = preprocess.get_preprocessed_image(img)
+    RunTime = eval(preprocess.params.run_time)
+    run_time = RunTime(preprocess.params)
+    results = run_time.run(img)
+    postprocess = PostProcessDetection(img, model_dir)
+    img = get_postprocessed_image(img, results)
 
     image_handler.saveImage("linux_preprocessed.jpg", img)
 
