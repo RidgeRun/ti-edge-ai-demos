@@ -71,7 +71,6 @@ class PostProcessClassification(PostProcess):
         results (numpy array): Output of the model run
             classnames (dictionary): Map for class ID to class name
         """
-        start = time()
         top5 = np.argpartition(results[0], -5)[0][:-6:-1]
         orig_width = frame.shape[1]
         orig_height = frame.shape[0]
