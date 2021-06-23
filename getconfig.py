@@ -29,6 +29,7 @@ class GetConfigYaml:
     def parse_params(self, yaml_params):
         def params(): return None
 
+        # Get the preprocess parameters
         params.resize = yaml_params['preprocess']['resize']
         crop = yaml_params['preprocess']['crop']
         if (isinstance(crop, int)):
@@ -38,4 +39,15 @@ class GetConfigYaml:
         params.scale = yaml_params['preprocess']['scale']
         params.reverse_channels = yaml_params['preprocess']['reverse_channels']
         params.data_layout = yaml_params['preprocess']['data_layout']
+
+        # Get the session parameters
+        params.run_time = yaml_params['session']['session_name']
+        if isinstance(yaml_params['session']['model_path'], list):
+            params.model_path = model_dir + \
+                yaml_params['session']['model_path'][0]
+        else:
+            params.model_path = model_dir + \
+                yaml_params['session']['model_path']
+        params.artifacts = model_dir + \
+            yaml_params['session']['artifacts_folder']
         return params
