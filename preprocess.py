@@ -87,3 +87,37 @@ class PreProcess:
             self.params.scale,
             self.params.data_layout.index("C"))
         return img
+
+
+class PreProcessClassification(PreProcess):
+    def resize_smaller_dim(self, img, dim):
+        orig_height, orig_width, _ = img.shape
+        new_height = orig_height * dim // min(img.shape[:2])
+        new_width = orig_width * dim // min(img.shape[:2])
+
+        img = self.resize(img, new_width, new_height)
+
+        return img
+
+    def centre_crop(self, img, width, height):
+        orig_height, orig_width, _ = img.shape
+        startx = orig_width // 2 - (width // 2)
+        starty = orig_height // 2 - (height // 2)
+
+        img = img[starty: starty + height, startx: startx + width]
+
+        return img
+
+    def get_preprocessed_image(self, img):
+        img = self.resize_smaller_dim(img, self.params.resize)
+        img = self.centre_crop(img, *self.params.crop)
+        if (not self.params.reverse_channels):
+            img = self.channel_swap_bgr_to_rgb(img)
+        img = self.change_format(img, 'HWC', self.params.data_layout)
+        img = self.subtract_mean_and_scale(
+            img,
+            self.params.mean,
+            self.params.scale,
+            self.params.data_layout.index('C'))
+
+        return img
