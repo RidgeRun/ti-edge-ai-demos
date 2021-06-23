@@ -49,3 +49,55 @@ class PostProcess:
         img = cv2.putText(img, "model : " + self.model_name, (40, 40 + 100),
                           cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
         return img
+
+
+class PostProcessClassification(PostProcess):
+    def overlay_top5_classnames(
+            self,
+            frame,
+            results,
+            classnames,
+            label_offset):
+        """
+        Process the results of the image classification model and draw text
+        describing top 5 detected objects on the image.
+
+        Args:
+            frame (numpy array): Input image in BGR format where the overlay should
+        be drawn
+        results (numpy array): Output of the model run
+            classnames (dictionary): Map for class ID to class name
+        """
+        start = time()
+        top5 = np.argpartition(results[0], -5)[0][:-6:-1]
+        orig_width = frame.shape[1]
+        orig_height = frame.shape[0]
+        # cv2.rectangle(frame, (0, 0), (int(orig_width/4), int(orig_height/4)), \
+        #                               (40, 40, 40), -1)
+        cv2.putText(frame, "Top 5 detected classes:", (int(
+            3 * orig_width / 4), 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        row = 1
+        for idx in top5:
+            cv2.putText(
+                frame,
+                "%s" %
+                classnames.get(
+                    idx +
+                    label_offset),
+                (int(
+                    3 *
+                    orig_width /
+                    4),
+                    40 +
+                    40 *
+                    row),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (255,
+                 255,
+                 255),
+                2)
+            row = row + 1
+
+        end = time()
+        return frame
