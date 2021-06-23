@@ -16,6 +16,9 @@ import yaml
 import cv2
 import numpy as np
 
+(cam_width, cam_height) = (1280, 720)
+(disp_width, disp_height) = (1920, 1080)
+
 
 class PostProcess:
     def __init__(self, img, model_dir):
@@ -101,3 +104,15 @@ class PostProcessClassification(PostProcess):
 
         end = time()
         return frame
+
+    def get_postprocessed_image(self, img):
+        classnames = eval(self.params.dataset)
+
+        img = overlay_title(
+            img,
+            disp_width -
+            cam_width,
+            disp_height -
+            cam_height)
+        img = overlay_top5_classnames(
+            img, results, classnames, self.params.label_offset)
