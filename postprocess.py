@@ -54,6 +54,61 @@ class PostProcess:
         return img
 
 
+class PostProcessDetection(PostProcess):
+    def overlay_bounding_box(frame, results, classnames, score_thresh,
+                             scalex, scaley, label_offset, formatter):
+        class_IDs, scores, bounding_boxes = results
+        for i, score in enumerate(np.squeeze(scores, axis=0)):
+            if (score <= score_thresh):
+                continue
+            box = bounding_boxes[0][i]
+            box = [int(box[formatter.index(0)] * scalex),
+                   int(box[formatter.index(1)] * scaley),
+                   int(box[formatter.index(2)] * scalex),
+                   int(box[formatter.index(3)] * scaley)]
+            class_id = label_offset[int(class_IDs[0][i])]
+            # print("%d: Detected object %s with score %f @(%d,%d) to (%d,%d)" % \
+            # (i, classnames[class_id], score, box[0], box[1], box[2], box[3]))
+            box_color = (int(120 * score), int(120 * score), int(50 * score))
+            text_color = (int(240 * score), int(240 * score), int(240 * score))
+            cv2.rectangle(frame, (box[0], box[1]),
+                          (box[2], box[3]), box_color, 2)
+            cv2.rectangle(frame,
+                          (int((box[2] + box[0]) / 2) - 5,
+                           int((box[3] + box[1]) / 2) + 5),
+                          (int((box[2] + box[0]) / 2) + 160,
+                              int((box[3] + box[1]) / 2) - 15),
+                          box_color,
+                          -1)
+            cv2.putText(frame,
+                        classnames[class_id],
+                        (int((box[2] + box[0]) / 2),
+                         int((box[3] + box[1]) / 2)),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        text_color)
+
+        return frame
+
+    def get_preprocessed_image(self, img, results):
+        classnames = eval(self.params.dataset)
+        scalex = cam_width / self.params.resize[0]
+        scaley = cam_height / self.params.resize[1]
+
+        img = utils.overlay_bounding_box(
+            img,
+            results,
+            classnames,
+            args.threshold,
+            scalex,
+            scaley,
+            params.label_offset,
+            params.formatter)
+        img = utils.overlay_title(img, disp_width - cam_width,
+                                  disp_height - cam_height)
+        return img
+
+
 class PostProcessClassification(PostProcess):
     def overlay_top5_classnames(
             self,
