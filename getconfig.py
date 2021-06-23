@@ -50,4 +50,16 @@ class GetConfigYaml:
                 yaml_params['session']['model_path']
         params.artifacts = model_dir + \
             yaml_params['session']['artifacts_folder']
+
+        # Get the postprocess parameters
+        params.formatter = (0, 1, 2, 3)
+        if 'formatter' in yaml_params['postprocess']:
+            formatter = yaml_params['postprocess']['formatter']
+            if (formatter is not None):
+                params.formatter = formatter['src_indices']
+
+        # Get the dataset parameters
+        params.dataset = yaml_params['input_dataset']['name']
+        params.task_type = yaml_params['task_type']
+
         return params
