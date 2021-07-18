@@ -90,5 +90,31 @@ class MediaManager():
 
         self._Dict.update({key: media})
 
+    def remove_media(self, key):
+        """Remove media from dictionary
+
+        Parameters
+        ----------
+        media : obj
+            The media object to remove from dictionary
+
+        Raises
+        ------
+        MediaManagerError
+            If the description fails to remove the media
+        """
+
+        if key is None:
+            raise MediaManagerError("Invalid key")
+
+        if key not in self._Dict:
+            raise MediaManagerError("Unable to find the key in the dictionary")
+
+        if self._Dict[key] is not None:
+            del self._Dict[key]
+            self._Dict[key] = None
+
+        self.pop(key)
+
     def _get_media_dict(self):
         return self._Dict
