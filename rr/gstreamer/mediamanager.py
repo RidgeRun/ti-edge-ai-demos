@@ -85,11 +85,10 @@ class MediaManager():
             If the description fails to insert the media
         """
 
-        try:
-            self._Dict.update({key: media})
-        except GLib.GError as e:
-            raise MediaManagerError(
-                "Unable to add the media to dictionary") from e
+        if key is None or media is None:
+            raise MediaManagerError("Invalid key or media")
+
+        self._Dict.update({key: media})
 
     def _get_media_dict(self):
         return self._Dict
