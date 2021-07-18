@@ -67,7 +67,7 @@ class MediaManager():
             gst_media = GstMedia()
             gst_media.create_media(desc)
             media = gst_media.get_media()
-        except GLib.GError as e:
+        except KeyError as e:
             raise MediaManagerError("Unable to create the media") from e
         return media
 
