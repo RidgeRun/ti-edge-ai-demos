@@ -115,5 +115,18 @@ class MediaManager():
 
         self._Dict.pop(key)
 
+    def start_media(self):
+        """Start the medias from dictionary
+
+        Parameters
+        ----------
+
+        Raises
+        ------
+        """
+
+        for key in self._Dict:
+            self._Dict[key].play_media()
+
     def _get_media_dict(self):
         return self._Dict

@@ -40,6 +40,15 @@ class TestMediaManager(unittest.TestCase):
         self.mediamanager.remove_media(self.key)
         self.assertFalse(self.key in dict)
 
+    def teststart_media(self):
+        desc2 = "videotestsrc pattern=colors ! fakesink"
+        key2 = "pattern_colors"
+
+        media2 = self.mediamanager.create_media(desc2)
+        self.mediamanager.add_media(key2, media2)
+
+        self.mediamanager.start_media()
+
 
 class TestMediaManagerFail(unittest.TestCase):
     def setUp(self):
