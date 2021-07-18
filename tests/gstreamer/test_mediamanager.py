@@ -34,6 +34,12 @@ class TestMediaManager(unittest.TestCase):
 
         self.assertEqual(self.media, dict[self.key])
 
+    def testremove_media(self):
+        dict = self.mediamanager._get_media_dict()
+
+        self.mediamanager.remove_media(self.key)
+        self.assertFalse(self.key in dict)
+
 
 class TestMediaManagerFail(unittest.TestCase):
     def setUp(self):
