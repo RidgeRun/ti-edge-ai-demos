@@ -41,8 +41,6 @@ class MediaManager():
         Constructor for the Media Gstreamer Manager object
         """
 
-        self.gst_media = GstMedia()
-
         self._Dict = {}
 
     def create_media(self, desc):
@@ -60,15 +58,17 @@ class MediaManager():
 
         Return
         ------
-        media : GstMedia obj
+        media : GstMedia obj from a description
         """
 
         try:
+            self.gst_media = GstMedia()
             self.gst_media.create_media(desc)
-            media = self.gst_media.get_media()
+
         except KeyError as e:
             raise MediaManagerError("Unable to create the media") from e
-        return media
+
+        return self.gst_media
 
     def add_media(self, key, media):
         """Install a new media into a dictionary
