@@ -69,6 +69,14 @@ class TestMediaManagerFail(unittest.TestCase):
         with self.assertRaisesRegex(MediaManagerError, "Unable to find the key in the dictionary"):
             self.mediamanager.remove_media(random.random())
 
+    def teststart_media(self):
+        key = "start_media"
+        with self.assertRaisesRegex(MediaManagerError, "Invalid key or media"):
+            self.mediamanager.add_media(key, None)
+
+            with self.assertRaisesRegex(MediaManagerError, "Unable to start media"):
+                self.mediamanager.start_media()
+
 
 if __name__ == '__main__':
     unittest.main()
