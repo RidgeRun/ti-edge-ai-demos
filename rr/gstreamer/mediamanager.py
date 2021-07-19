@@ -126,7 +126,10 @@ class MediaManager():
         """
 
         for key in self._Dict:
-            self._Dict[key].play_media()
+            try:
+                self._Dict[key].play_media()
+            except GstMediaError as e:
+                raise MediaManagerError("Unable to start media") from e
 
     def _get_media_dict(self):
         return self._Dict
