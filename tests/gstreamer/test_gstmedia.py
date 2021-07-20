@@ -10,9 +10,10 @@ gi.require_version('GLib', '2.0')  # nopep8
 from gi.repository import Gst as gst
 from gi.repository import GLib
 
+import unittest
+
 from rr.gstreamer.gstmedia import GstMedia
 from rr.gstreamer.gstmedia import GstMediaError
-import unittest
 
 
 def _get_mediaState(media):
