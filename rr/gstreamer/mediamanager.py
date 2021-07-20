@@ -24,8 +24,8 @@ class MediaManager():
 
     Attributes
     ----------
-    _pipeline : GstElement
-        A private GStreamer pipeline object
+    _Dict : dictionary
+        A private dictionary to handle the medias
 
     Methods
     -------
