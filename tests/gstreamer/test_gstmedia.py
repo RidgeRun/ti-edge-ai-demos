@@ -22,7 +22,7 @@ def _get_mediaState(media):
 
 class TestGstMedia(unittest.TestCase):
     def setUp(self):
-        self.desc = "videotestsrc ! fakesink async=false"
+        self.desc = "videotestsrc is-live=true ! fakesink async=false"
 
         self.gstmedia = GstMedia()
 
@@ -63,7 +63,7 @@ class TestGstMedia(unittest.TestCase):
 class TestGstMediaFail(unittest.TestCase):
     def testcreate_media(self):
         # Force desc to make media fail
-        self.desc = "videotestsrc ! "
+        self.desc = "videotestsrc is-live=true ! "
         self.gstmedia = GstMedia()
 
         with self.assertRaisesRegex(GstMediaError, "Unable to create the media"):
