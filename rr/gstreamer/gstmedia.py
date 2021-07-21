@@ -88,7 +88,7 @@ class GstMedia():
         """
 
         ret = self._pipeline.set_state(gst.State.PLAYING)
-        if gst.StateChangeReturn.FAILURE == ret:
+        if gst.StateChangeReturn.SUCCESS != ret:
             raise GstMediaError("Unable to play the media")
 
     def stop_media(self):

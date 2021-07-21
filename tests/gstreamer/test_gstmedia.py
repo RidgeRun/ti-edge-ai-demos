@@ -22,7 +22,7 @@ def _get_mediaState(media):
 
 class TestGstMedia(unittest.TestCase):
     def setUp(self):
-        self.desc = "videotestsrc ! fakesink"
+        self.desc = "videotestsrc ! fakesink async=false"
 
         self.gstmedia = GstMedia()
 

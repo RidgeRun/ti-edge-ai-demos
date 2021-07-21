@@ -18,7 +18,7 @@ import unittest
 
 class TestMediaManager(unittest.TestCase):
     def setUp(self):
-        desc = "videotestsrc ! fakesink"
+        desc = "videotestsrc ! fakesink async=false"
         self.key = "setup"
 
         self.mediamanager = MediaManager()
@@ -41,7 +41,7 @@ class TestMediaManager(unittest.TestCase):
         self.assertFalse(self.key in dict)
 
     def teststart_media(self):
-        desc2 = "videotestsrc pattern=colors ! fakesink"
+        desc2 = "videotestsrc pattern=colors ! fakesink async=false"
         key2 = "pattern_colors"
 
         media2 = self.mediamanager.create_media(desc2)
