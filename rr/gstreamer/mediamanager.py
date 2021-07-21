@@ -110,7 +110,6 @@ class MediaManager():
             raise MediaManagerError("Unable to find the key in the dictionary")
 
         if self._Dict[key] is not None:
-            del self._Dict[key]
             self._Dict[key] = None
 
         self._Dict.pop(key)
