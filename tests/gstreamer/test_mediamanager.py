@@ -70,12 +70,17 @@ class TestMediaManagerFail(unittest.TestCase):
             self.mediamanager.remove_media(random.random())
 
     def teststart_media(self):
+        desc = "videotestsrc ! fakesink async=false state-error=3"
         key = "start_media"
+
+        media = self.mediamanager.create_media(desc)
+        self.mediamanager.add_media(key, media)
+
+        with self.assertRaisesRegex(MediaManagerError, "Unable to start media"):
+            self.mediamanager.start_media()
+
         with self.assertRaisesRegex(MediaManagerError, "Invalid key or media"):
             self.mediamanager.add_media(key, None)
-
-            with self.assertRaisesRegex(MediaManagerError, "Unable to start media"):
-                self.mediamanager.start_media()
 
 
 if __name__ == '__main__':
