@@ -43,6 +43,8 @@ class MediaManager():
 
         self._Dict = {}
 
+        self.gst_media = GstMedia()
+
     def create_media(self, desc):
         """Create a media object
 
@@ -62,7 +64,6 @@ class MediaManager():
         """
 
         try:
-            self.gst_media = GstMedia()
             self.gst_media.create_media(desc)
 
         except KeyError as e:
