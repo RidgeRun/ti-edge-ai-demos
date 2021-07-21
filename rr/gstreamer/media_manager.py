@@ -10,8 +10,8 @@ gi.require_version('GLib', '2.0')  # nopep8
 from gi.repository import Gst as gst  # nopep8
 from gi.repository import GLib  # nopep8
 
-from rr.gstreamer.gstmedia import GstMedia
-from rr.gstreamer.gstmedia import GstMediaError
+from rr.gstreamer.gst_media import GstMedia
+from rr.gstreamer.gst_media import GstMediaError
 
 
 class MediaManagerError(RuntimeError):

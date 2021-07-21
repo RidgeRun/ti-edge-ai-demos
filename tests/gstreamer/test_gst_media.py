@@ -12,11 +12,11 @@ from gi.repository import GLib
 
 import unittest
 
-from rr.gstreamer.gstmedia import GstMedia
-from rr.gstreamer.gstmedia import GstMediaError
+from rr.gstreamer.gst_media import GstMedia
+from rr.gstreamer.gst_media import GstMediaError
 
 
-def _get_mediaState(media):
+def _get_media_State(media):
     return media.get_state(gst.CLOCK_TIME_NONE)[1]
 
 
@@ -36,21 +36,21 @@ class TestGstMedia(unittest.TestCase):
         assert self.gstmedia.get_media() is None, "Failed to delete the media object properly"
 
     def testplay_media(self):
-        media_state = _get_mediaState(self.gstmedia.get_media())
+        media_state = _get_media_State(self.gstmedia.get_media())
         self.assertEqual(gst.State.NULL, media_state)
 
         self.gstmedia.play_media()
-        media_state = _get_mediaState(self.gstmedia.get_media())
+        media_state = _get_media_State(self.gstmedia.get_media())
         self.assertEqual(gst.State.PLAYING, media_state)
 
     def teststop_media(self):
         self.gstmedia.play_media()
-        media_state = _get_mediaState(self.gstmedia.get_media())
+        media_state = _get_media_State(self.gstmedia.get_media())
         self.assertEqual(gst.State.PLAYING, media_state)
 
         self.gstmedia.stop_media()
 
-        media_state = _get_mediaState(self.gstmedia.get_media())
+        media_state = _get_media_State(self.gstmedia.get_media())
         self.assertEqual(gst.State.NULL, media_state)
 
     def testdelete_multiple_times(self):
@@ -78,7 +78,7 @@ class TestGstMediaFail(unittest.TestCase):
         with self.assertRaisesRegex(GstMediaError, "Unable to play the media"):
             self.gstmedia.play_media()
 
-        media_state = _get_mediaState(self.gstmedia.get_media())
+        media_state = _get_media_State(self.gstmedia.get_media())
         self.assertNotEqual(gst.State.PLAYING, media_state)
 
     def teststop_media(self):
@@ -91,7 +91,7 @@ class TestGstMediaFail(unittest.TestCase):
         with self.assertRaisesRegex(GstMediaError, "Unable to stop the media"):
             self.gstmedia.stop_media()
 
-        media_state = _get_mediaState(self.gstmedia.get_media())
+        media_state = _get_media_State(self.gstmedia.get_media())
         self.assertNotEqual(gst.State.PLAYING, media_state)
 
 
