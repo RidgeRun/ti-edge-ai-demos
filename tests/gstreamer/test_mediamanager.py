@@ -40,14 +40,14 @@ class TestMediaManager(unittest.TestCase):
         self.mediamanager.remove_media(self.key)
         self.assertFalse(self.key in dict)
 
-    def teststart_media(self):
+    def testplay_media(self):
         desc2 = "videotestsrc pattern=colors ! fakesink async=false"
         key2 = "pattern_colors"
 
         media2 = self.mediamanager.create_media(desc2)
         self.mediamanager.add_media(key2, media2)
 
-        self.mediamanager.start_media()
+        self.mediamanager.play_media()
 
 
 class TestMediaManagerFail(unittest.TestCase):
@@ -69,15 +69,15 @@ class TestMediaManagerFail(unittest.TestCase):
         with self.assertRaisesRegex(MediaManagerError, "Unable to find the key in the dictionary"):
             self.mediamanager.remove_media(random.random())
 
-    def teststart_media(self):
+    def testplay_media(self):
         desc = "videotestsrc ! fakesink async=false state-error=3"
-        key = "start_media"
+        key = "play_media"
 
         media = self.mediamanager.create_media(desc)
         self.mediamanager.add_media(key, media)
 
         with self.assertRaisesRegex(MediaManagerError, "Unable to start media"):
-            self.mediamanager.start_media()
+            self.mediamanager.play_media()
 
         with self.assertRaisesRegex(MediaManagerError, "Invalid key or media"):
             self.mediamanager.add_media(key, None)

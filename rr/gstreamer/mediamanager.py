@@ -115,7 +115,7 @@ class MediaManager():
 
         self._Dict.pop(key)
 
-    def start_media(self):
+    def play_media(self):
         """Start the medias from dictionary
 
         Parameters
