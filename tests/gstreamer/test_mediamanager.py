@@ -49,6 +49,9 @@ class TestMediaManager(unittest.TestCase):
 
         self.mediamanager.play_media()
 
+    def teststop_media(self):
+        self.mediamanager.stop_media()
+
 
 class TestMediaManagerFail(unittest.TestCase):
     def setUp(self):
@@ -81,6 +84,16 @@ class TestMediaManagerFail(unittest.TestCase):
 
         with self.assertRaisesRegex(MediaManagerError, "Invalid key or media"):
             self.mediamanager.add_media(key, None)
+
+    def teststop_media(self):
+        desc = "videotestsrc is-live=true ! fakesink async=false state-error=5"
+        key = "play_media"
+
+        media = self.mediamanager.create_media(desc)
+        self.mediamanager.add_media(key, media)
+        self.mediamanager.play_media()
+        with self.assertRaisesRegex(MediaManagerError, "Unable to stop media"):
+            self.mediamanager.stop_media()
 
 
 if __name__ == '__main__':

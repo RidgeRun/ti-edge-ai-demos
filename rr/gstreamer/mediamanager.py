@@ -130,5 +130,20 @@ class MediaManager():
             except GstMediaError as e:
                 raise MediaManagerError("Unable to start media") from e
 
+    def stop_media(self):
+        """Stop the medias from dictionary
+
+        Raises
+        ------
+        MediaManagerError
+            If the description fails to stop the medias
+        """
+
+        for key in self._Dict:
+            try:
+                self._Dict[key].stop_media()
+            except GstMediaError as e:
+                raise MediaManagerError("Unable to stop media") from e
+
     def _get_media_dict(self):
         return self._Dict
