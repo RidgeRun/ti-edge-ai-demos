@@ -29,11 +29,18 @@ class MediaManager():
 
     Methods
     -------
-    create_media(desc : str)
-        Creates the media object from a string description
+    add_media(key : str, media : media obj):
+        Install a new media into the dictionary
 
-    add_media(key : str, media : GstMedia obj):
-        Install a new media into a dictionary
+    remove_media(key : str):
+        Remove media from dictionary
+
+    play_media():
+        Play the medias from dictionary
+
+    stop_media():
+        Stop the medias from dictionary
+
     """
 
     def __init__(self):
@@ -118,11 +125,10 @@ class MediaManager():
     def play_media(self):
         """Start the medias from dictionary
 
-        Parameters
-        ----------
-
         Raises
         ------
+        MediaManagerError
+            If the description fails to play the medias
         """
 
         for key in self._Dict:
