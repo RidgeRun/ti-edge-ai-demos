@@ -13,13 +13,13 @@ from gi.repository import GLib  # nopep8
 import random
 import unittest
 
-from rr.gstreamer.gst_media import GstMedia
+from rr.gstreamer.imedia import IMedia
 from rr.gstreamer.media_manager import MediaManager
 from rr.gstreamer.media_manager import MediaManagerError
 
 
 def get_media():
-    return GstMedia()
+    return IMedia()
 
 
 class TestMediaManager(unittest.TestCase):
