@@ -13,8 +13,13 @@ from gi.repository import GLib  # nopep8
 import random
 import unittest
 
+from rr.gstreamer.gst_media import GstMedia
 from rr.gstreamer.media_manager import MediaManager
 from rr.gstreamer.media_manager import MediaManagerError
+
+
+def get_media():
+    return GstMedia()
 
 
 class TestMediaManager(unittest.TestCase):
@@ -24,7 +29,8 @@ class TestMediaManager(unittest.TestCase):
 
         self.media_manager = MediaManager()
 
-        self.media = self.media_manager.create_media(desc)
+        self.media = get_media()
+        self.media.create_media(desc)
 
         self.media_manager.add_media(self.key, self.media)
 
@@ -42,11 +48,13 @@ class TestMediaManager(unittest.TestCase):
         self.assertFalse(self.key in dict)
 
     def testplay_media(self):
-        desc2 = "videotestsrc is-live=true pattern=colors ! fakesink async=false"
-        key2 = "pattern_colors"
+        desc = "videotestsrc is-live=true pattern=colors ! fakesink async=false"
+        key = "pattern_colors"
 
-        media2 = self.media_manager.create_media(desc2)
-        self.media_manager.add_media(key2, media2)
+        media = get_media()
+        media.create_media(desc)
+
+        self.media_manager.add_media(key, media)
 
         self.media_manager.play_media()
 
@@ -77,7 +85,9 @@ class TestMediaManagerFail(unittest.TestCase):
         desc = "videotestsrc is-live=true ! fakesink async=false state-error=3"
         key = "play_media"
 
-        media = self.media_manager.create_media(desc)
+        media = get_media()
+        media.create_media(desc)
+
         self.media_manager.add_media(key, media)
 
         with self.assertRaisesRegex(MediaManagerError, "Unable to start media"):
@@ -90,7 +100,9 @@ class TestMediaManagerFail(unittest.TestCase):
         desc = "videotestsrc is-live=true ! fakesink async=false state-error=5"
         key = "play_media"
 
-        media = self.media_manager.create_media(desc)
+        media = get_media()
+        media.create_media(desc)
+
         self.media_manager.add_media(key, media)
         self.media_manager.play_media()
         with self.assertRaisesRegex(MediaManagerError, "Unable to stop media"):
