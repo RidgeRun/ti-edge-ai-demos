@@ -10,8 +10,7 @@ gi.require_version('GLib', '2.0')  # nopep8
 from gi.repository import Gst as gst  # nopep8
 from gi.repository import GLib  # nopep8
 
-from rr.gstreamer.gst_media import GstMedia
-from rr.gstreamer.gst_media import GstMediaError
+from rr.gstreamer.gst_media import GstMediaError as MediaError
 
 
 class MediaManagerError(RuntimeError):
@@ -49,34 +48,6 @@ class MediaManager():
         """
 
         self._Dict = {}
-
-        self.gst_media = GstMedia()
-
-    def create_media(self, desc):
-        """Create a media object
-
-        Parameters
-        ----------
-        desc : str
-            The media description
-
-        Raises
-        ------
-        MediaManagerError
-            If the description fails to create the media
-
-        Return
-        ------
-        media : GstMedia obj from a description
-        """
-
-        try:
-            self.gst_media.create_media(desc)
-
-        except KeyError as e:
-            raise MediaManagerError("Unable to create the media") from e
-
-        return self.gst_media
 
     def add_media(self, key, media):
         """Install a new media into a dictionary
@@ -134,7 +105,7 @@ class MediaManager():
         for key in self._Dict:
             try:
                 self._Dict[key].play_media()
-            except GstMediaError as e:
+            except MediaError as e:
                 raise MediaManagerError("Unable to start media") from e
 
     def stop_media(self):
@@ -149,7 +120,7 @@ class MediaManager():
         for key in self._Dict:
             try:
                 self._Dict[key].stop_media()
-            except GstMediaError as e:
+            except MediaError as e:
                 raise MediaManagerError("Unable to stop media") from e
 
     def _get_media_dict(self):
