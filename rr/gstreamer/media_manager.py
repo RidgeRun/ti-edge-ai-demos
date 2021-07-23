@@ -10,7 +10,7 @@ gi.require_version('GLib', '2.0')  # nopep8
 from gi.repository import Gst as gst  # nopep8
 from gi.repository import GLib  # nopep8
 
-from rr.gstreamer.gst_media import GstMediaError as MediaError
+from rr.gstreamer.imedia import IMediaError
 
 
 class MediaManagerError(RuntimeError):
@@ -105,7 +105,7 @@ class MediaManager():
         for key in self._Dict:
             try:
                 self._Dict[key].play_media()
-            except MediaError as e:
+            except IMediaError as e:
                 raise MediaManagerError("Unable to start media") from e
 
     def stop_media(self):
@@ -120,7 +120,7 @@ class MediaManager():
         for key in self._Dict:
             try:
                 self._Dict[key].stop_media()
-            except MediaError as e:
+            except IMediaError as e:
                 raise MediaManagerError("Unable to stop media") from e
 
     def _get_media_dict(self):
