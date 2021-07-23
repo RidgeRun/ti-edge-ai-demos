@@ -11,9 +11,10 @@ from gi.repository import Gst as gst  # nopep8
 from gi.repository import GLib  # nopep8
 
 import random
+import unittest
+
 from rr.gstreamer.media_manager import MediaManager
 from rr.gstreamer.media_manager import MediaManagerError
-import unittest
 
 
 class TestMediaManager(unittest.TestCase):
