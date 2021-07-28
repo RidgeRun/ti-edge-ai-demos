@@ -64,7 +64,7 @@ class IMedia(Media):
         try:
             self.media.create_media(desc)
         except MediaError as e:
-            raise IMediaError("Unable to create the media")
+            raise IMediaError("Unable to create the media") from e
 
     def delete_media(self):
         """Deletes the media object
@@ -78,7 +78,7 @@ class IMedia(Media):
         try:
             self.media.delete_media()
         except MediaError as e:
-            raise IMediaError("Unable to delete the media")
+            raise IMediaError("Unable to delete the media") from e
 
     def play_media(self):
         """Set the media state to playing
@@ -92,7 +92,7 @@ class IMedia(Media):
         try:
             self.media.play_media()
         except MediaError as e:
-            raise IMediaError("Unable to play the media")
+            raise IMediaError("Unable to play the media") from e
 
     def stop_media(self):
         """Set the media state to stopped
@@ -105,7 +105,7 @@ class IMedia(Media):
         try:
             self.media.stop_media()
         except MediaError as e:
-            raise IMediaError("Unable to stop the media")
+            raise IMediaError("Unable to stop the media") from e
 
     def get_media(self):
         """Getter for the media object
@@ -114,6 +114,6 @@ class IMedia(Media):
         try:
             ret = self.media.get_media()
         except MediaError as e:
-            raise IMediaError("Invalid media")
+            raise IMediaError("Invalid media") from e
 
         return ret
