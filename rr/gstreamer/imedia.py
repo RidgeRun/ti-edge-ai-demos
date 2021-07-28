@@ -51,7 +51,7 @@ class IMedia(Media):
 
         Raises
         ------
-        MediaError
+        IMediaError
             If the description fails to create the media
         """
 
@@ -65,7 +65,7 @@ class IMedia(Media):
 
         Raises
         ------
-        MediaError
+        IMediaError
             If could not delete the media
         """
 
@@ -79,7 +79,7 @@ class IMedia(Media):
 
         Raises
         ------
-        MediaError
+        IMediaError
             If couldn't set the media state to playing
         """
 
@@ -93,7 +93,7 @@ class IMedia(Media):
 
         Raises
         ------
-        MediaError
+        IMediaError
             If couldn't set the media state to stopped
         """
         try:
@@ -103,6 +103,16 @@ class IMedia(Media):
 
     def get_media(self):
         """Getter for the media object
+
+        Returns
+        -------
+        ret : media object
+            The media object
+
+        Raises
+        ------
+        IMediaError
+            If couldn't set the media state to stopped
         """
 
         try:
