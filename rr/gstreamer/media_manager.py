@@ -63,7 +63,7 @@ class MediaManager():
             If the description fails to insert the media
         """
 
-        if key is None or media is None:
+        if (key is None) or (media is None):
             raise MediaManagerError("Invalid key or media")
 
         self._Dict.update({key: media})
