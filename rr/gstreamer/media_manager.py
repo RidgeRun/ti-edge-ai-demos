@@ -117,5 +117,12 @@ class MediaManager():
             except IMediaError as e:
                 raise MediaManagerError("Unable to stop media") from e
 
+    def push_buffer(self, on_new_image_cb):
+        for key in self._Dict:
+            try:
+                self._Dict[key].push_buffer(on_new_image_cb)
+            except IMediaError as e:
+                raise MediaManagerError("Unable to push media buffer") from e
+
     def _get_media_dict(self):
         return self._Dict
