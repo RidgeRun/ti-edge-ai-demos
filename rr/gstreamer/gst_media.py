@@ -10,6 +10,17 @@ gi.require_version('GLib', '2.0')  # nopep8
 from gi.repository import Gst as gst  # nopep8
 from gi.repository import GLib  # nopep8
 
+import cv2
+import numpy as np
+
+
+def mock_create_image(width, height, rgb_color=(0, 0, 0)):
+    image = np.zeros((height, width, 3), np.uint8)
+    color = tuple(reversed(rgb_color))
+    image[:] = color
+
+    return image
+
 
 class GstMediaError(RuntimeError):
     pass
@@ -105,7 +116,7 @@ class GstMedia():
             raise GstMediaError("Unable to stop the media")
 
     def push_buffer(self, on_new_buffer):
-        on_new_buffer(None)
+        on_new_buffer(mock_create_image(1980, 1280, rgb_color=(100, 100, 100)))
 
     def get_media(self):
         """Getter for the private media object
