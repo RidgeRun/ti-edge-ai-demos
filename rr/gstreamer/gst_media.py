@@ -104,6 +104,9 @@ class GstMedia():
         if gst.StateChangeReturn.FAILURE == ret:
             raise GstMediaError("Unable to stop the media")
 
+    def push_buffer(self, on_new_buffer):
+        on_new_buffer(None)
+
     def get_media(self):
         """Getter for the private media object
         """
