@@ -28,9 +28,8 @@ def mock_create_image(width, height, rgb_color=(0, 0, 0)):
     return image
 
 
-class MockMediaManager(MediaManager):
-    def push_buffer(self, callback):
-        callback(mock_create_image(1980, 1280, rgb_color=(100, 100, 100)))
+def push_buffer(callback):
+    callback(mock_create_image(1980, 1280, rgb_color=(100, 100, 100)))
 
 
 class TestStreamManager(unittest.TestCase):
@@ -50,10 +49,10 @@ class TestStreamManager(unittest.TestCase):
 
         mock_on_new_image_cb = MagicMock()
 
-        media_manager = MockMediaManager()
+        media_manager = MediaManager()
         media_manager.add_media(key, media)
 
-        media_manager.push_buffer(mock_on_new_image_cb)
+        push_buffer(mock_on_new_image_cb)
 
         stream_manager = StreamManager(ai_manager, media_manager)
 

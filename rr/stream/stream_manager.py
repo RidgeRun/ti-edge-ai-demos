@@ -42,7 +42,3 @@ class StreamManager():
 
         self.ai_manager = ai_manager
         self.media_manager = media_manager
-
-        on_new_image_cb = OnNewImage(self.ai_manager)
-
-        self.media_manager.push_buffer(on_new_image_cb)
