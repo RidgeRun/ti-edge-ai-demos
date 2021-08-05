@@ -4,62 +4,46 @@
 #  Authors: Daniel Chaves <daniel.chaves@ridgerun.com>
 #           Marisol Zeledon <marisol.zeledon@ridgerun.com>
 
-import numpy as np
-import cv2
 import unittest
 from unittest.mock import MagicMock
 
-from rr.ai.ai_manager import AIManagerOnNewImage
-from rr.gstreamer.imedia import IMedia
-from rr.gstreamer.media_manager import MediaManager
 from rr.stream.stream_manager import StreamManager
-from rr.stream.stream_manager import OnNewImage
+
+
+class MockAiManager:
+    def __init__(self):
+        self.process = MagicMock()
+
+
+class MockImage:
+    pass
+
 
 model = "/opt/edge_ai_apps/models/detection/TFL-OD-200-ssd-mobV1-coco-mlperf-300x300/"
 disp_width = 2040
 disp_height = 1920
+mock_image = MockImage()
 
 
-def mock_create_image(width, height, rgb_color=(0, 0, 0)):
-    image = np.zeros((height, width, 3), np.uint8)
-    color = tuple(reversed(rgb_color))
-    image[:] = color
+class MockMediaManager:
+    def install_callback(self, cb):
+        self.cb = cb
 
-    return image
-
-
-def push_buffer(callback):
-    callback(mock_create_image(1980, 1280, rgb_color=(100, 100, 100)))
+    def play(self):
+        self.cb(mock_image, model, disp_width, disp_height)
 
 
 class TestStreamManager(unittest.TestCase):
-    def setUp(self):
-        self.mock_on_new_prediction_cb = MagicMock()
-        self.mock_on_new_postprocess_cb = MagicMock()
-
-        ai_manager = AIManagerOnNewImage(model, disp_width, disp_height,
-                                         self.mock_on_new_prediction_cb,
-                                         self.mock_on_new_postprocess_cb)
-
-        desc = "videotestsrc is-live=true ! fakesink async=false"
-        key = "media1"
-
-        media = IMedia()
-        media.create_media(desc)
-
-        mock_on_new_image_cb = MagicMock()
-
-        media_manager = MediaManager()
-        media_manager.add_media(key, media)
-
-        push_buffer(mock_on_new_image_cb)
+    def test_success(self):
+        media_manager = MockMediaManager()
+        ai_manager = MockAiManager()
 
         stream_manager = StreamManager(ai_manager, media_manager)
 
-        mock_on_new_image_cb.assert_called_once()
+        stream_manager.start()
 
-    def teststream(self):
-        pass
+        ai_manager.process.assert_called_with(
+            mock_image, model, disp_width, disp_height)
 
 
 if __name__ == '__main__':
