@@ -34,8 +34,12 @@ class YamlFormat:
             with open(path, 'r') as stream:
                 cfg = yaml.safe_load(stream)
         except FileNotFoundError as e:
-            raise YamlFormatError("Unable to find configuration file") from e
+            raise YamlFormatError(
+                "Unable to find configuration file '%s'" %
+                path) from e
         except yaml.parser.ParserError as e:
-            raise YamlFormatError("Provided config file is invalid") from e
+            raise YamlFormatError(
+                "Provided config file '%s' is invalid" %
+                path) from e
 
         return cfg
