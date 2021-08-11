@@ -5,6 +5,7 @@
 
 from argparse import ArgumentParser
 from rr.config.app_config_loader import AppConfigLoader
+from rr.gstreamer.gst_media import GstMedia
 import logging
 import traceback
 
@@ -21,7 +22,7 @@ def error(e):
 def parse_args():
 
     parser = ArgumentParser(description='AI CCTV system for smart cities')
-    parser.add_argument('-f', dest='config_file', default='config.yml',
+    parser.add_argument('-f', dest='config_file', default='config.yaml',
                         help='configuration file used by the system.')
     parser.add_argument(
         '-v',
@@ -38,8 +39,16 @@ def main():
     error.verbose = args.verbose
 
     config = AppConfigLoader()
+    gstmedia = GstMedia()
+
     try:
-        config.load(args.config_file)
+        config_dict = config.load(args.config_file)
+
+        for stream in config_dict['streams']:
+            pipeline = 'uridecodebin uri=%s ! videoconvert ! appsink sync=false qos=false async=false name=appsink' % (
+                stream['uri'])
+            gstmedia.create_media(pipeline)
+
     except RuntimeError as e:
         error(e)
 
