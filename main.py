@@ -6,6 +6,10 @@
 from argparse import ArgumentParser
 from rr.config.app_config_loader import AppConfigLoader
 from rr.gstreamer.gst_media import GstMedia
+from rr.gstreamer.media_manager import MediaManager
+from rr.stream.stream_manager import StreamManager
+from rr.ai.ai_manager import AIManager
+
 import logging
 import traceback
 
@@ -38,16 +42,29 @@ def main():
 
     error.verbose = args.verbose
 
+    disp_width = '320'
+    disp_height = '240'
+    model = "/opt/edge_ai_apps/models/detection/TFL-OD-200-ssd-mobV1-coco-mlperf-300x300/"
+
     config = AppConfigLoader()
-    gstmedia = GstMedia()
+    media_manager = MediaManager()
+    ai_manager = AIManager(model, disp_width, disp_height)
+    stream_manager = StreamManager(
+        ai_manager,
+        media_manager,
+        model,
+        disp_width,
+        disp_height)
 
     try:
         config_dict = config.load(args.config_file)
 
         for stream in config_dict['streams']:
-            pipeline = 'uridecodebin uri=%s ! videoconvert ! appsink sync=false qos=false async=false name=appsink' % (
+            desc = 'uridecodebin uri=%s ! videoconvert ! appsink sync=false qos=false async=false name=appsink' % (
                 stream['uri'])
-            gstmedia.create_media(pipeline)
+            gstmedia = GstMedia()
+            gstmedia.create_media(desc)
+            media_manager.add_media(stream['id'], gstmedia)
 
     except RuntimeError as e:
         error(e)
