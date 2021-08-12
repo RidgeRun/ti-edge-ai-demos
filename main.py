@@ -63,7 +63,7 @@ def main():
             desc = 'uridecodebin uri=%s ! videoconvert ! appsink sync=false qos=false async=false name=appsink' % (
                 stream['uri'])
             gstmedia = GstMedia()
-            gstmedia.create_media(desc)
+            gstmedia.create_media(stream['id'], desc)
             media_manager.add_media(stream['id'], gstmedia)
 
     except RuntimeError as e:
