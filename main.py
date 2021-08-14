@@ -49,8 +49,9 @@ def main():
     model = "/opt/edge_ai_apps/models/detection/TFL-OD-200-ssd-mobV1-coco-mlperf-300x300/"
 
     config = AppConfigLoader()
-    media_manager = MediaManager()
     ai_manager = AIManagerOnNewImage(model, disp_width, disp_height)
+    media_manager = MediaManager()
+
     stream_manager = StreamManager(
         ai_manager,
         media_manager,
