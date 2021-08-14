@@ -4,14 +4,14 @@
 #           Marisol Zeledon <marisol.zeledon@ridgerun.com>
 
 from argparse import ArgumentParser
+import logging
+import traceback
+
+from rr.ai.ai_manager import AIManager
 from rr.config.app_config_loader import AppConfigLoader
 from rr.gstreamer.gst_media import GstMedia
 from rr.gstreamer.media_manager import MediaManager
 from rr.stream.stream_manager import StreamManager
-from rr.ai.ai_manager import AIManager
-
-import logging
-import traceback
 
 
 def error(e):
