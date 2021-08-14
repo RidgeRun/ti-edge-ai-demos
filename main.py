@@ -50,7 +50,7 @@ def main():
 
     config = AppConfigLoader()
     media_manager = MediaManager()
-    ai_manager = AIManager(model, disp_width, disp_height)
+    ai_manager = AIManagerOnNewImage(model, disp_width, disp_height)
     stream_manager = StreamManager(
         ai_manager,
         media_manager,
