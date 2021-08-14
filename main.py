@@ -7,7 +7,9 @@ from argparse import ArgumentParser
 import logging
 import traceback
 
-from rr.ai.ai_manager import AIManager
+from rr.actions.action_manager import ActionManager
+from rr.actions.action_manager import Trigger, TriggerError
+from rr.ai.ai_manager import AIManagerOnNewImage
 from rr.config.app_config_loader import AppConfigLoader
 from rr.gstreamer.gst_media import GstMedia
 from rr.gstreamer.media_manager import MediaManager
