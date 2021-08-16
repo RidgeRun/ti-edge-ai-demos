@@ -135,7 +135,7 @@ class DisplayManager():
                 str(w) + ",height=" + str(h) + " ! mixer. "
 
         self._display_desc = desc
-        self._media.create_media(self._display_desc)
+        self._media.create_media("display", self._display_desc)
 
     def play_display(self):
         """

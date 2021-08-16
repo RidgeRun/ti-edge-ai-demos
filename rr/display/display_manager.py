@@ -109,9 +109,11 @@ class DisplayManager():
                 "Stream doesn't exist in display manager")
 
     def push_image(self, image, media):
+        print("GRUNER push_image")
         media_name = media.get_name()
-        appsrc = appsrc_dict[media_name]
-        buffer = image.get_buffer()
+        appsrc = self._appsrc_dict[media_name]
+        sample = image.get_sample()
+        buffer = sample.get_buffer()
         appsrc.emit("push-buffer", buffer)
 
     def create_display(self):
@@ -138,8 +140,8 @@ class DisplayManager():
             DISPLAY_HEIGHT) + " ! kmssink force-modesetting=true sync=false async=false qos=false "
 
         for key in self._list:
-            desc += " appsrc name=" + key + " format=time ! queue ! width=" + str(w) + ",height=" + str(
-                h) + ",format=" + img_format + ",framerate=30/1" + " ! videoscale ! video/x-raw,width=" + str(w) + ",height=" + str(h) + " ! mixer. "
+            desc += " appsrc do-timestamp=true name=" + key + " format=time ! queue ! video/x-raw,width=" + str(w) + ",height=" + str(
+                h) + ",format=" + img_format + ",framerate=30/1,pixel-aspect-ratio=1/1 ! videoscale ! video/x-raw,width=" + str(w) + ",height=" + str(h) + " ! mixer. "
 
         self._display_desc = desc
         self._media.create_media("display", self._display_desc)
@@ -153,7 +155,7 @@ class DisplayManager():
         Play the display media
         """
         if self._display_desc is None:
-            raise DisplayManagerError("Display description not created yet")
+            self.create_display()
 
         try:
             self._media.play_media()
