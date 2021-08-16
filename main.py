@@ -8,6 +8,8 @@ import logging
 import traceback
 
 from rr.actions.action_manager import ActionManager
+from rr.actions.action_manager import Action, ActionError
+from rr.actions.action_manager import Filter, FilterError
 from rr.actions.action_manager import Trigger, TriggerError
 from rr.ai.ai_manager import AIManagerOnNewImage
 from rr.config.app_config_loader import AppConfigLoader
@@ -39,6 +41,38 @@ def parse_args():
     return parser.parse_args()
 
 
+def parse_filters(config):
+    filters = []
+    for desc in config['filters']:
+        filters.append(Filter.make(desc))
+
+    return filters
+
+
+def parse_actions(config):
+    actions = []
+    for desc in config['actions']:
+        actions.append(Action.make(desc))
+
+    return actions
+
+
+def parse_triggers(config, actions, filters):
+    triggers = []
+    for desc in config['triggers']:
+        triggers.append(Trigger.make(desc, actions, filters))
+
+    return triggers
+
+
+def create_action_manager(config):
+    filters = parse_filters(config)
+    actions = parse_actions(config)
+    triggers = parse_triggers(config, actions, filters)
+
+    return ActionManager(triggers)
+
+
 def main():
     args = parse_args()
 
@@ -50,11 +84,7 @@ def main():
 
     config = AppConfigLoader()
 
-    # ActionManager setup
-    trigger1 = Trigger(None, None, None)
-    action_manager = ActionManager([trigger1])
-
-    ai_manager = AIManagerOnNewImage(model, disp_width, disp_height)
+    #ai_manager = AIManagerOnNewImage(model, disp_width, disp_height)
     media_manager = MediaManager()
 
     stream_manager = StreamManager(
@@ -67,6 +97,8 @@ def main():
     try:
         config_dict = config.load(args.config_file)
 
+        action_manager = create_action_manager(config_dict)
+
         for stream in config_dict['streams']:
             desc = 'uridecodebin uri=%s ! videoconvert ! appsink sync=false qos=false async=false name=appsink' % (
                 stream['uri'])
@@ -74,7 +106,7 @@ def main():
             gstmedia.create_media(stream['id'], desc)
             media_manager.add_media(stream['id'], gstmedia)
 
-    except RuntimeError as e:
+    except Exception as e:
         error(e)
 
 
