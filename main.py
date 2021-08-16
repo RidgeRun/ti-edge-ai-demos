@@ -16,6 +16,7 @@ from rr.config.app_config_loader import AppConfigLoader
 from rr.gstreamer.gst_media import GstMedia
 from rr.gstreamer.media_manager import MediaManager
 from rr.stream.stream_manager import StreamManager
+from rr.display.display_manager import DisplayManager
 
 
 def error(e):
@@ -73,6 +74,36 @@ def create_action_manager(config):
     return ActionManager(triggers)
 
 
+def create_streams(config):
+    streams = []
+    for stream in config['streams']:
+        desc = 'uridecodebin uri=%s ! videoconvert ! appsink sync=false qos=false async=false name=appsink' % (
+            stream['uri'])
+        media = GstMedia()
+        media.create_media(stream['id'], desc)
+        streams.append(media)
+
+    return streams
+
+
+def create_media_manager(streams):
+    media_manager = MediaManager()
+
+    for stream in streams:
+        media_manager.add_media(stream.get_name(), stream)
+
+    return media_manager
+
+
+def create_display_manager(streams):
+    display_manager = DisplayManager()
+
+    for stream in streams:
+        display_manager.add_stream(stream)
+
+    return display_manager
+
+
 def main():
     args = parse_args()
 
@@ -84,27 +115,24 @@ def main():
 
     config = AppConfigLoader()
 
-    #ai_manager = AIManagerOnNewImage(model, disp_width, disp_height)
-    media_manager = MediaManager()
+    ai_manager = AIManagerOnNewImage(model, disp_width, disp_height)
 
-    stream_manager = StreamManager(
-        ai_manager,
-        media_manager,
-        model,
-        disp_width,
-        disp_height)
+
+#    stream_manager = StreamManager(
+#        ai_manager,
+#        media_manager,
+#        model,
+#        disp_width,
+#        disp_height)
 
     try:
         config_dict = config.load(args.config_file)
 
-        action_manager = create_action_manager(config_dict)
+        streams = create_streams(config_dict)
 
-        for stream in config_dict['streams']:
-            desc = 'uridecodebin uri=%s ! videoconvert ! appsink sync=false qos=false async=false name=appsink' % (
-                stream['uri'])
-            gstmedia = GstMedia()
-            gstmedia.create_media(stream['id'], desc)
-            media_manager.add_media(stream['id'], gstmedia)
+        media_manager = create_media_manager(streams)
+        display_manager = create_display_manager(streams)
+        action_manager = create_action_manager(config_dict)
 
     except Exception as e:
         error(e)
