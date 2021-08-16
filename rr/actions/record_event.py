@@ -21,10 +21,14 @@ class RecordingMedia():
 
 
 class RecordEvent():
-    def __init__(self, rec_dir):
+    def __init__(self, name, rec_dir):
+        self._name = name
         self._rec_dir = rec_dir
         self._medias_dict = {}
         self._mutex = Lock()
+
+    def get_name(self):
+        return self._name
 
     def execute(self, media, image, rec_time, inf_filter):
         media_name = media.get_name()
@@ -74,3 +78,13 @@ class RecordEvent():
     def stop_recordings(self):
         for media in list(self._medias_dict):
             del self._medias_dict[media]
+
+    @classmethod
+    def make(cls, desc):
+        try:
+            name = desc["name"]
+            location = desc["location"]
+        except KeyError as e:
+            raise RecordEventError("Malformed record event description") from e
+
+        return RecordEvent(name, location)

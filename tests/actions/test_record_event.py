@@ -72,7 +72,7 @@ class TestRecordEvent(unittest.TestCase):
         fil = MockFilter(True)
         num_bufs = 10
         rec_time = 15.0
-        event_rec = RecordEvent(rec_dir)
+        event_rec = RecordEvent("name", rec_dir)
 
         media0 = mockMedia("media0")
         for i in range(num_bufs):
@@ -102,7 +102,7 @@ class TestRecordEvent(unittest.TestCase):
         fil = MockFilter(False)
         num_bufs = 10
         rec_time = 5.0
-        event_rec = RecordEvent(rec_dir)
+        event_rec = RecordEvent("name", rec_dir)
 
         media2 = mockMedia("media2")
         for i in range(num_bufs):

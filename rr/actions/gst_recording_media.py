@@ -27,7 +27,7 @@ class GstRecordingMedia(GstMedia):
     def _init_pipe(self, image):
         desc = "appsrc format=time name=src ! video/x-raw,width=%d,height=%d,format=%s,framerate=30/1 ! videoconvert ! avenc_mpeg4 ! mpegtsmux ! filesink location=%s" % (
             image.get_width(), image.get_height(), GstVideo.VideoFormat.to_string(image.get_format()), self._filename)
-        self.create_media(desc)
+        self.create_media(self._filename, desc)
         self._appsrc = self._pipeline.get_by_name('src')
 
         self.play_media()
