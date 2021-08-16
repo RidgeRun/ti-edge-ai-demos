@@ -21,16 +21,24 @@ class RecordingMedia():
 
 
 class RecordEvent():
-    def __init__(self, name, rec_dir):
+    def __init__(self, name, rec_dir, rec_time):
         self._name = name
         self._rec_dir = rec_dir
         self._medias_dict = {}
         self._mutex = Lock()
+        self._rec_time = rec_time
+
+    def is_triggered(self, filters):
+        for f in filters:
+            if f.is_triggered():
+                return True
+
+        return False
 
     def get_name(self):
         return self._name
 
-    def execute(self, media, image, rec_time, inf_filter):
+    def execute(self, media, image, prediction, inf_filter):
         media_name = media.get_name()
 
         self._mutex.acquire()
@@ -38,16 +46,16 @@ class RecordEvent():
         self._check_dict(media_name)
         media = self._medias_dict[media_name]
 
-        if inf_filter.is_triggered():
+        if self.is_triggered(inf_filter):
 
             if not media.is_recording:
                 timestamp = image.get_timestamp()
                 filename = self._rec_dir + "/" + "detection_recording_" + \
-                    media_name + "_" + timestamp + ".ts"
+                    media_name + "_" + str(timestamp) + ".ts"
                 self._medias_dict[media_name].rec_media = GstRecordingMedia(
                     filename)
 
-            self._start_timer(media_name, rec_time, inf_filter)
+            self._start_timer(media_name, self._rec_time, inf_filter)
 
         if media.is_recording:
             media.rec_media.push_image(image)
@@ -84,7 +92,8 @@ class RecordEvent():
         try:
             name = desc["name"]
             location = desc["location"]
+            length = desc["length"]
         except KeyError as e:
             raise RecordEventError("Malformed record event description") from e
 
-        return RecordEvent(name, location)
+        return RecordEvent(name, location, length)
