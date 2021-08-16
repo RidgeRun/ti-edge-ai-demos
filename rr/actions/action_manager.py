@@ -23,7 +23,7 @@ class Filter:
 
         for instance in prediction["instances"]:
             for label in instance["labels"]:
-                if label["class"] in self._labels and label["probability"] >= self._probability:
+                if label["label"] in self._labels and label["probability"] >= self._probability:
                     self._is_triggered = True
                     return
 
