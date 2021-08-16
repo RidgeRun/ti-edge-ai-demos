@@ -18,7 +18,7 @@ from rr.actions.record_event import RecordEvent
 
 width = 320
 height = 240
-fmt = GstVideo.VideoFormat.RGBA
+fmt = "RGBA"
 size = 320 * 240 * 4
 data = np.zeros((size))
 
@@ -31,10 +31,24 @@ class mockMedia():
         return self.media_name
 
 
+class MockSample():
+    def __init__(self):
+        self._pts = 0
+
+    def get_buffer(self):
+        data = np.zeros((size))
+        buf = Gst.Buffer.new_wrapped(data)
+        buf.pts = self._pts
+        buf.dts = self._pts
+        buf.duration = 33333333
+        self._pts = self._pts + 33333333
+        return buf
+
+
 class MockImage():
     def __init__(self, timestamp):
-        self._pts = 0
-        self.timestamp = timestamp
+        self._sample = MockSample()
+        self._timestamp = timestamp
 
     def get_width(self):
         return width
@@ -45,14 +59,11 @@ class MockImage():
     def get_format(self):
         return fmt
 
-    def get_buffer(self):
-        buf = Gst.Buffer.new_wrapped_full(0, data, size, 0, None, None)
-        buf.pts = self._pts
-        self._pts = self._pts + 33333333
-        return buf
+    def get_sample(self):
+        return self._sample
 
     def get_timestamp(self):
-        return self.timestamp
+        return self._timestamp
 
 
 class MockFilter():
@@ -72,17 +83,17 @@ class TestRecordEvent(unittest.TestCase):
         fil = MockFilter(True)
         num_bufs = 10
         rec_time = 15.0
-        event_rec = RecordEvent("name", rec_dir)
+        event_rec = RecordEvent("name", rec_dir, rec_time)
 
         media0 = mockMedia("media0")
         for i in range(num_bufs):
-            event_rec.execute(media0, img, rec_time, fil)
+            event_rec.execute(media0, img, None, [fil])
 
         media1 = mockMedia("media1")
         for i in range(num_bufs):
             if i == 2:
                 fil.trigger_status = False
-            event_rec.execute(media1, img, rec_time, fil)
+            event_rec.execute(media1, img, rec_time, [fil])
 
         event_rec.stop_recordings()
 
@@ -102,11 +113,11 @@ class TestRecordEvent(unittest.TestCase):
         fil = MockFilter(False)
         num_bufs = 10
         rec_time = 5.0
-        event_rec = RecordEvent("name", rec_dir)
+        event_rec = RecordEvent("name", rec_dir, rec_time)
 
         media2 = mockMedia("media2")
         for i in range(num_bufs):
-            event_rec.execute(media2, img, rec_time, fil)
+            event_rec.execute(media2, img, None, [fil])
 
         path_media2 = "/tmp/detection_recording_media2_" + timestamp + ".ts"
 

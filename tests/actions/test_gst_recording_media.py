@@ -21,13 +21,27 @@ import cv2 as cv
 
 width = 320
 height = 240
-fmt = GstVideo.VideoFormat.RGBA
+fmt = 'RGBA'
 size = 320 * 240 * 4
+
+
+class MockSample():
+    def __init__(self):
+        self._pts = 0
+
+    def get_buffer(self):
+        data = np.zeros((size))
+        buf = Gst.Buffer.new_wrapped(data)
+        buf.pts = self._pts
+        buf.dts = self._pts
+        buf.duration = 33333333
+        self._pts = self._pts + 33333333
+        return buf
 
 
 class MockImage():
     def __init__(self):
-        self._pts = 0
+        self._sample = MockSample()
 
     def get_width(self):
         return width
@@ -38,14 +52,8 @@ class MockImage():
     def get_format(self):
         return fmt
 
-    def get_buffer(self):
-        data = np.zeros((size))
-        buf = Gst.Buffer.new_wrapped(data)
-        buf.pts = self._pts
-        buf.dts = self._pts
-        buf.duration = 33333333
-        self._pts = self._pts + 33333333
-        return buf
+    def get_sample(self):
+        return self._sample
 
 
 class TestGstRecordingMedia(unittest.TestCase):

@@ -24,7 +24,7 @@ class TestMediaManager(unittest.TestCase):
         self.media_manager = MediaManager()
 
         self.media = get_media()
-        self.media.create_media(desc)
+        self.media.create_media("name", desc)
 
         self.media_manager.add_media(self.key, self.media)
 
@@ -46,7 +46,7 @@ class TestMediaManager(unittest.TestCase):
         key = "pattern_colors"
 
         media = get_media()
-        media.create_media(desc)
+        media.create_media("name", desc)
 
         self.media_manager.add_media(key, media)
 
@@ -80,7 +80,7 @@ class TestMediaManagerFail(unittest.TestCase):
         key = "play_media"
 
         media = get_media()
-        media.create_media(desc)
+        media.create_media("name", desc)
 
         self.media_manager.add_media(key, media)
 
@@ -95,7 +95,7 @@ class TestMediaManagerFail(unittest.TestCase):
         key = "play_media"
 
         media = get_media()
-        media.create_media(desc)
+        media.create_media("name", desc)
 
         self.media_manager.add_media(key, media)
         self.media_manager.play_media()

@@ -18,7 +18,7 @@ class TestFilter(unittest.TestCase):
         self._desc = {
             "name": "test",
             "labels": ["cat", "dog"],
-            "probability": 0.5
+            "threshold": 0.5
         }
 
     def test_make_invalid(self):
@@ -41,28 +41,28 @@ class TestFilter(unittest.TestCase):
         desc = {
             "name": "test",
             "labels": "cat",
-            "probability": 0.5
+            "threshold": 0.5
         }
 
         pred = {"instances": [
-            {"labels": [{"class": "cat", "probability": 0.5}]}]}
+            {"labels": [{"label": "cat", "probability": 0.5}]}]}
         self.common(desc, pred, True)
 
     def test_is_triggered_multi_label(self):
         pred = {"instances": [
-            {"labels": [{"class": "dog", "probability": 0.5}]}]}
+            {"labels": [{"label": "dog", "probability": 0.5}]}]}
 
         self.common(self._desc, pred, True)
 
     def test_not_triggered_lower_prob(self):
         pred = {"instances": [
-            {"labels": [{"class": "dog", "probability": 0.49}]}]}
+            {"labels": [{"label": "dog", "probability": 0.49}]}]}
 
         self.common(self._desc, pred, False)
 
     def test_not_triggered_no_class(self):
         pred = {"instances": [
-            {"labels": [{"class": "snake", "probability": 0.9}]}]}
+            {"labels": [{"label": "snake", "probability": 0.9}]}]}
 
         self.common(self._desc, pred, False)
 

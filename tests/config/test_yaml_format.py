@@ -25,7 +25,10 @@ class TestYamlFormat(unittest.TestCase):
         with self.assertRaises(YamlFormatError) as e:
             self.formatter.parse(yaml)
 
-        self.assertEqual("Unable to find configuration file", str(e.exception))
+        self.assertEqual(
+            "Unable to find configuration file '%s'" %
+            yaml, str(
+                e.exception))
 
     def test_invalid(self):
         yaml = 'tests/config/test_yaml_invalid.yaml'
@@ -33,7 +36,10 @@ class TestYamlFormat(unittest.TestCase):
         with self.assertRaises(YamlFormatError) as e:
             self.formatter.parse(yaml)
 
-        self.assertEqual("Provided config file is invalid", str(e.exception))
+        self.assertEqual(
+            "Provided config file '%s' is invalid" %
+            yaml, str(
+                e.exception))
 
 
 if __name__ == '__main__':
