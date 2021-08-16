@@ -4,6 +4,7 @@
 #           Marisol Zeledon <marisol.zeledon@ridgerun.com>
 
 from rr.actions.log_event import LogEvent
+from rr.actions.record_event import RecordEvent
 
 
 class FilterError(RuntimeError):
@@ -35,7 +36,7 @@ class Filter:
             name = desc["name"]
             labels = desc["labels"] if isinstance(
                 desc["labels"], list) else [desc["labels"]]
-            probability = desc["probability"]
+            probability = desc["threshold"]
         except KeyError as e:
             raise FilterError("Malformed filter description") from e
 
@@ -56,6 +57,8 @@ class Action:
 
         if atype == "log_event":
             return LogEvent.make(desc)
+        elif atype == "record_event":
+            return RecordEvent.make(desc)
         else:
             raise ActionError('Unkown action "%s"' % atype)
 
