@@ -150,6 +150,9 @@ class LogEvent():
         self._log(media, image, inf_results)
         self._mutex.release()
 
+    def get_name(self):
+        return self._name
+
     @classmethod
     def make(cls, desc):
         try:
@@ -158,4 +161,4 @@ class LogEvent():
         except KeyError as e:
             raise LogEventError("Malformed log event description") from e
 
-        return LogEvent(location)
+        return LogEvent(name, location)
