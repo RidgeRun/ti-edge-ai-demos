@@ -75,6 +75,20 @@ class StreamManager():
         """
 
         try:
+            self.display_manager.play_display()
             self.media_manager.play_media()
-        except MediaManagerError as e:
+
+        except Exception as e:
             raise StreamManagerError("Unable to play the stream") from e
+
+    def stop(self):
+        """
+        Stop the stream server
+        """
+
+        try:
+            self.media_manager.stop_media()
+            self.display_manager.stop_display()
+
+        except Exception as e:
+            raise StreamManagerError("Unable to stop the stream") from e

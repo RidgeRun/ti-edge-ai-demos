@@ -104,6 +104,10 @@ def create_display_manager(streams):
     return display_manager
 
 
+def create_ai_manager(model, disp_width, disp_height):
+    return AIManagerOnNewImage(model, disp_width, disp_height)
+
+
 def main():
     args = parse_args()
 
@@ -115,16 +119,6 @@ def main():
 
     config = AppConfigLoader()
 
-    ai_manager = AIManagerOnNewImage(model, disp_width, disp_height)
-
-
-#    stream_manager = StreamManager(
-#        ai_manager,
-#        media_manager,
-#        model,
-#        disp_width,
-#        disp_height)
-
     try:
         config_dict = config.load(args.config_file)
 
@@ -133,9 +127,25 @@ def main():
         media_manager = create_media_manager(streams)
         display_manager = create_display_manager(streams)
         action_manager = create_action_manager(config_dict)
+        ai_manager = create_ai_manager(model, disp_width, disp_height)
+
+        stream_manager = StreamManager(
+            action_manager,
+            ai_manager,
+            display_manager,
+            media_manager,
+            model,
+            disp_width,
+            disp_height)
 
     except Exception as e:
         error(e)
+
+    try:
+        stream_manager.play()
+        input("Press Enter...")
+    except KeyboardInterrupt:
+        stream_manager.stop()
 
 
 if __name__ == '__main__':
