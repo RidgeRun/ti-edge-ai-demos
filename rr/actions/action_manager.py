@@ -27,6 +27,9 @@ class Filter:
                     self._is_triggered = True
                     return
 
+    def get_name(self):
+        return self._name
+
     def is_triggered(self):
         return self._is_triggered
 
