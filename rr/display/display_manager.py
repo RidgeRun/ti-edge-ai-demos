@@ -135,12 +135,13 @@ class DisplayManager():
 
         desc += xpos_desc
         desc += ypos_desc
-        desc += " ! queue ! video/x-raw,width=" + str(DISPLAY_WIDTH) + ",height=" + str(
-            DISPLAY_HEIGHT) + " ! videoconvert ! kmssink force-modesetting=true sync=false async=false qos=false "
+
+        desc += " ! queue ! videoconvert ! videoscale ! video/x-raw,width=" + str(DISPLAY_WIDTH) + ",height=" + str(
+            DISPLAY_HEIGHT) + " ! kmssink force-modesetting=true sync=false async=false qos=false "
 
         for key in self._list:
             desc += " appsrc do-timestamp=true name=" + key + " format=time ! queue ! video/x-raw,width=" + str(w) + ",height=" + str(
-                h) + ",format=" + img_format + ",framerate=30/1,pixel-aspect-ratio=1/1 ! videoscale ! video/x-raw,width=" + str(w) + ",height=" + str(h) + " ! mixer. "
+                h) + ",format=RGB,framerate=30/1,pixel-aspect-ratio=1/1" + " ! videoconvert ! videoscale ! video/x-raw,width=" + str(w) + ",height=" + str(h) + " ! mixer. "
 
         self._display_desc = desc
         self._media.create_media("display", self._display_desc)

@@ -52,8 +52,8 @@ class SmartCCTV:
     def _create_streams(self, config):
         streams = []
         for stream in config['streams']:
-            desc = 'uridecodebin uri=%s ! videoconvert ! videoscale ! video/x-raw,format=RGB,width=320,height=240 ! appsink emit-signals=true name=appsink' % (
-                stream['uri'])
+            desc = 'rtspsrc location=%s ! queue ! rtph264depay ! h264parse ! avdec_h264 ! queue ! videoconvert ! videoscale ! video/x-raw,width=320,height=240,format=RGB ! appsink emit-signals=true name=appsink' % (
+                stream["uri"])
             media = GstMedia()
             media.create_media(stream['id'], desc)
             streams.append(media)
