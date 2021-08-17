@@ -1,13 +1,13 @@
 streams:
   - id: "stream0"
-    uri: "file:///home/root/work/devdirs/project_ti/nbc.mp4"
+    uri: "rtsp://10.251.200.34:5000/stream"
     triggers:
-      - person_recording
+      - person_logging
 
   - id: "stream1"
-    uri: "file:///home/root/work/devdirs/project_ti/nbc.mp4"
+    uri: "rtsp://10.251.200.34:5000/stream"
     triggers:
-      - person_recording
+      - person_logging
 
 filters:
   - name: person_filter
@@ -33,12 +33,6 @@ actions:
     location: /tmp/log.xls
 
 triggers:
-  - name: person_recording
-    action: start_recording
-    filters:
-      - person_filter
-      - animal_filter
-
   - name: person_logging
     action: log_event
     filters:
