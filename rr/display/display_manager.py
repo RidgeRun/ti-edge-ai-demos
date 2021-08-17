@@ -109,7 +109,6 @@ class DisplayManager():
                 "Stream doesn't exist in display manager")
 
     def push_image(self, image, media):
-        print("GRUNER push_image")
         media_name = media.get_name()
         appsrc = self._appsrc_dict[media_name]
         sample = image.get_sample()
