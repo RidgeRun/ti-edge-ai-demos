@@ -1,0 +1,45 @@
+streams:
+  - id: "stream0"
+    uri: "file:///home/root/work/devdirs/project_ti/nbc.mp4"
+    triggers:
+      - person_recording
+
+  - id: "stream1"
+    uri: "file:///home/root/work/devdirs/project_ti/nbc.mp4"
+    triggers:
+      - person_recording
+
+filters:
+  - name: person_filter
+    labels:
+      - male
+      - child
+    threshold: 0.7
+
+  - name: animal_filter
+    labels:
+      - cat
+      - dog
+    threshold: 0.8
+
+actions:
+  - name: start_recording
+    type: record_event
+    length: 10
+    location: /tmp/
+
+  - name: log_event
+    type: log_event
+    location: /tmp/log.xls
+
+triggers:
+  - name: person_recording
+    action: start_recording
+    filters:
+      - person_filter
+      - animal_filter
+
+  - name: person_logging
+    action: log_event
+    filters:
+      - person_filter
