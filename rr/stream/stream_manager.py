@@ -4,8 +4,8 @@
 #  Authors: Daniel Chaves <daniel.chaves@ridgerun.com>
 #           Marisol Zeledon <marisol.zeledon@ridgerun.com>
 
-from rr.ai.ai_manager import AIManagerOnNewImage
-from rr.gstreamer.media_manager import MediaManager
+#from rr.ai.ai_manager import AIManagerOnNewImage
+#from rr.gstreamer.media_manager import MediaManager
 
 
 class OnNewImage():

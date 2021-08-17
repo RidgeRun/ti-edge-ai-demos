@@ -136,7 +136,7 @@ class DisplayManager():
         desc += xpos_desc
         desc += ypos_desc
         desc += " ! queue ! video/x-raw,width=" + str(DISPLAY_WIDTH) + ",height=" + str(
-            DISPLAY_HEIGHT) + " ! kmssink force-modesetting=true sync=false async=false qos=false "
+            DISPLAY_HEIGHT) + " ! videoconvert ! glimagesink sync=false async=false qos=false "
 
         for key in self._list:
             desc += " appsrc do-timestamp=true name=" + key + " format=time ! queue ! video/x-raw,width=" + str(w) + ",height=" + str(
