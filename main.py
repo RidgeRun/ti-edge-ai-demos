@@ -7,16 +7,12 @@ from argparse import ArgumentParser
 import logging
 import traceback
 
-from rr.actions.action_manager import ActionManager
-from rr.actions.action_manager import Action, ActionError
-from rr.actions.action_manager import Filter, FilterError
-from rr.actions.action_manager import Trigger, TriggerError
-from rr.ai.ai_manager import AIManagerOnNewImage
+import gi  # nopep8
+gi.require_version('GLib', '2.0')  # nopep8
+from gi.repository import GLib  # nopep8
+
 from rr.config.app_config_loader import AppConfigLoader
-from rr.gstreamer.gst_media import GstMedia
-from rr.gstreamer.media_manager import MediaManager
-from rr.stream.stream_manager import StreamManager
-from rr.display.display_manager import DisplayManager
+from rr.smart_cctv import SmartCCTV
 
 
 def error(e):
@@ -42,110 +38,26 @@ def parse_args():
     return parser.parse_args()
 
 
-def parse_filters(config):
-    filters = []
-    for desc in config['filters']:
-        filters.append(Filter.make(desc))
-
-    return filters
-
-
-def parse_actions(config):
-    actions = []
-    for desc in config['actions']:
-        actions.append(Action.make(desc))
-
-    return actions
-
-
-def parse_triggers(config, actions, filters):
-    triggers = []
-    for desc in config['triggers']:
-        triggers.append(Trigger.make(desc, actions, filters))
-
-    return triggers
-
-
-def create_action_manager(config):
-    filters = parse_filters(config)
-    actions = parse_actions(config)
-    triggers = parse_triggers(config, actions, filters)
-
-    return ActionManager(triggers)
-
-
-def create_streams(config):
-    streams = []
-    for stream in config['streams']:
-        desc = 'uridecodebin uri=%s ! videoconvert ! appsink sync=false qos=false async=false name=appsink' % (
-            stream['uri'])
-        media = GstMedia()
-        media.create_media(stream['id'], desc)
-        streams.append(media)
-
-    return streams
-
-
-def create_media_manager(streams):
-    media_manager = MediaManager()
-
-    for stream in streams:
-        media_manager.add_media(stream.get_name(), stream)
-
-    return media_manager
-
-
-def create_display_manager(streams):
-    display_manager = DisplayManager()
-
-    for stream in streams:
-        display_manager.add_stream(stream)
-
-    return display_manager
-
-
-def create_ai_manager(model, disp_width, disp_height):
-    return AIManagerOnNewImage(model, disp_width, disp_height)
-
-
 def main():
     args = parse_args()
 
     error.verbose = args.verbose
 
-    disp_width = '320'
-    disp_height = '240'
-    model = "/opt/edge_ai_apps/models/detection/TFL-OD-200-ssd-mobV1-coco-mlperf-300x300/"
-
     config = AppConfigLoader()
 
     try:
         config_dict = config.load(args.config_file)
-
-        streams = create_streams(config_dict)
-
-        media_manager = create_media_manager(streams)
-        display_manager = create_display_manager(streams)
-        action_manager = create_action_manager(config_dict)
-        ai_manager = create_ai_manager(model, disp_width, disp_height)
-
-        stream_manager = StreamManager(
-            action_manager,
-            ai_manager,
-            display_manager,
-            media_manager,
-            model,
-            disp_width,
-            disp_height)
-
+        server = SmartCCTV(config_dict)
     except Exception as e:
         error(e)
 
     try:
-        stream_manager.play()
-        input("Press Enter...")
+        server.start()
+        print("Starting Smart CCTV server, press ctrl+c to interrupt...")
+        GLib.MainLoop().run()
     except KeyboardInterrupt:
-        stream_manager.stop()
+        print("Cleaning up.")
+        server.stop()
 
 
 if __name__ == '__main__':
