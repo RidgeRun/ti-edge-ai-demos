@@ -102,6 +102,16 @@ class GstMedia():
             If couldn't set the media state to stopped
         """
 
+        # Nothing to be done if the pipe is not running
+        ret, current, pending = self._pipeline.get_state(gst.CLOCK_TIME_NONE)
+        if current != gst.State.PLAYING:
+            return
+
+        # Send an EOS and wait 5 seconds for the EOS to arrive before closing
+        timeout = 5000000000  # 5 seconds in nanoseconds
+        self._pipeline.send_event(gst.Event.new_eos())
+        self._pipeline.get_bus().timed_pop_filtered(timeout, gst.MessageType.EOS)
+
         ret = self._pipeline.set_state(gst.State.NULL)
         if gst.StateChangeReturn.FAILURE == ret:
             raise GstMediaError("Unable to stop the media")
