@@ -110,19 +110,29 @@ class PostProcessDetection(PostProcess):
             class_id = label_offset[int(class_IDs[0][i])]
             box_color = (int(120 * score), int(120 * score), int(50 * score))
             text_color = (int(240 * score), int(240 * score), int(240 * score))
-            cv2.rectangle(frame, (box[0], box[1]),
-                          (box[2], box[3]), box_color, 2)
+
+            start_point = (box[0], box[1])
+            end_point = (box[2], box[3])
+            cv2.rectangle(frame, start_point,
+                          end_point, box_color, 2)
+
+            y_padding = - 7
+
+            start_point = (int((box[2] + box[0]) / 2) - 5,
+                           int((box[3] + box[1]) / 2) + y_padding)
+            end_point = (int((box[2] + box[0]) / 2) + 100,
+                         int((box[3] + box[1]) / 2) - 15)
             cv2.rectangle(frame,
-                          (int((box[2] + box[0]) / 2) - 5,
-                           int((box[3] + box[1]) / 2) + 5),
-                          (int((box[2] + box[0]) / 2) + 160,
-                              int((box[3] + box[1]) / 2) - 15),
+                          start_point,
+                          end_point,
                           box_color,
                           -1)
+
+            y_text_centering_padding = - 1
             cv2.putText(frame,
                         classnames[class_id],
                         (int((box[2] + box[0]) / 2),
-                         int((box[3] + box[1]) / 2)),
+                         int((box[3] + box[1]) / 2) + y_padding + y_text_centering_padding),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         0.3,
                         text_color)
