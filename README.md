@@ -49,7 +49,7 @@ model_params:
 
 streams:
   - id: "stream_one"
-    uri: 'rtsp://some.rtsp.camera/stream
+    uri: 'rtsp://some.rtsp.camera/stream'
     triggers:
       - recording_trigger
       - logging_trigger
