@@ -87,6 +87,9 @@ class AIManager():
         self.postprocess_obj = PostProcessDetection(
             model, disp_width, disp_height)
 
+        # Make a warmup run to start the engine
+        self.inference_obj.run(np.zeros((1, 300, 300, 3), dtype='float32'))
+
     def preprocess_detection(self, image):
         """Preprocess the image
 
