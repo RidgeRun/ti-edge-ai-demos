@@ -4,7 +4,7 @@
 This demo shows how to create a multi-channel AI server with capabilities to detect user-specific objects and trigger actions based on inference results, which is a system that is typically found at "Smart City" applications.  It receives multiple RTSP video streams and detects objects based on the user's needs, and triggers actions such as video recordings and event logging. This demo could become a base system in "Smart City" applications like surveillance, traffic congestion control, smart parking use cases and more.
 
 ## Platform
-To get started with the Jacinto 7 platform setup, please visit: ![Getting Started with Jacinto 7](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwip1K6evM_yAhXOSjABHfsgBkYQFnoECAMQAQ&url=https%3A%2F%2Fwww.ti.com%2Flit%2Fpdf%2Fspruis8&usg=AOvVaw1e94ifWdg3Fd4pQoeM8IMF)
+To get started with the Jacinto 7 platform setup, please visit: https://www.ti.com/lit/ml/spruis8/spruis8.pdf
 
 ## Building the Project
 
