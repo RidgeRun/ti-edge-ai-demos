@@ -11,6 +11,9 @@ from gi.repository import Gst as gst  # nopep8
 from gi.repository import GLib  # nopep8
 
 
+SECONDS_TO_NANOSECONDS = 1000000000
+
+
 class GstMediaError(RuntimeError):
     pass
 
@@ -109,7 +112,7 @@ class GstMedia():
             return
 
         # Send an EOS and wait 5 seconds for the EOS to arrive before closing
-        timeout = 5000000000  # 5 seconds in nanoseconds
+        timeout = 5 * SECONDS_TO_NANOSECONDS
         self._pipeline.send_event(gst.Event.new_eos())
         self._pipeline.get_bus().timed_pop_filtered(timeout, gst.MessageType.EOS)
 
