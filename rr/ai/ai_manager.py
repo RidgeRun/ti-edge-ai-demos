@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 import threading
 
+from bin.utils.getconfig import GetConfigYaml
 from bin.utils.imagehandler import ImageHandler
 from rr.gstreamer.gst_media import GstImage
 from rr.gstreamer.gst_media import GstUtils
@@ -79,6 +80,8 @@ class AIManager():
         Constructor for the AI Manager object
         """
 
+        self._model_config = GetConfigYaml(model)
+
         self.preprocess_obj = PreProcessDetection(model)
 
         RunTime = eval(self.preprocess_obj.params.run_time)
@@ -88,7 +91,8 @@ class AIManager():
             model, disp_width, disp_height)
 
         # Make a warmup run to start the engine
-        self.inference_obj.run(np.zeros((1, 300, 300, 3), dtype='float32'))
+        self.inference_obj.run(
+            np.zeros((1, *(self._model_config.params.resize), 3), dtype='float32'))
 
     def preprocess_detection(self, image):
         """Preprocess the image
