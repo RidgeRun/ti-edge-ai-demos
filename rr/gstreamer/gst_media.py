@@ -103,6 +103,7 @@ class GstMedia():
         """
 
         # Nothing to be done if the pipe is not running
+        print("Stopping media...")
         ret, current, pending = self._pipeline.get_state(gst.CLOCK_TIME_NONE)
         if current != gst.State.PLAYING:
             return
