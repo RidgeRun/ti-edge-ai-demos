@@ -172,7 +172,11 @@ class GstMedia():
 
     @classmethod
     def make(cls, desc, all_triggers):
-        pipe = 'uridecodebin uri=%s caps=video/x-h264 ! queue ! h264parse ! v4l2h264dec capture-io-mode=5 ! video/x-raw,format=NV12 ! queue ! tiovxmultiscaler  src_0::pool-size=8 sink::pool-size=8 ! tiovxcolorconvert out-pool-size=8 ! video/x-raw,width=320,height=240,format=RGB ! queue ! appsink sync=true qos=false emit-signals=true drop=true max-buffers=3 name=appsink' % (
+        pipe = '''uridecodebin uri=%s caps=video/x-h264 ! queue !
+                    h264parse ! v4l2h264dec capture-io-mode=5 ! video/x-raw,format=NV12 ! queue !
+                    tiovxmultiscaler  src_0::pool-size=8 sink::pool-size=8 ! tiovxcolorconvert out-pool-size=8 !
+                    video/x-raw,width=320,height=240,format=RGB ! queue !
+                    appsink sync=true qos=false emit-signals=true drop=true max-buffers=3 name=appsink''' % (
             desc["uri"])
         media = GstMedia()
         media.create_media(desc['id'], pipe)
