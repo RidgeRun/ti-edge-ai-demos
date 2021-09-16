@@ -91,8 +91,12 @@ class AIManager():
             model, disp_width, disp_height)
 
         # Make a warmup run to start the engine
-        self.inference_obj.run(
-            np.zeros((1, *(self._model_config.params.resize), 3), dtype='float32'))
+        self._model_channel_axis = self._model_config.params.data_layout.index(
+            'C')
+        self.inference_obj.run(np.zeros((1,
+                                         *(self._model_config.params.resize),
+                                         self._model_channel_axis),
+                                        dtype='float32'))
 
     def preprocess_detection(self, image):
         """Preprocess the image
