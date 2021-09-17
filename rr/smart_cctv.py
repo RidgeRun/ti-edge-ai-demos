@@ -19,6 +19,10 @@ class SmartCCTV:
         model_params = config['model_params']
         return model_params
 
+    def _parse_streams(self, config):
+        streams_dict = config['streams']
+        return streams_dict
+
     def _parse_filters(self, config):
         filters = []
         for desc in config['filters']:
@@ -82,7 +86,11 @@ class SmartCCTV:
     def __init__(self, config):
         # Make sure the AI manager is the first class to be created, otherwise
         # the engine will fail to start
-        ai_manager = self._create_ai_manager(config)
+        ai_manager_dict = {}
+        for key in self._parse_streams(config):
+            ai_manager_dict.update(
+                {key['id']: self._create_ai_manager(config)})
+
         streams = self._create_streams(config)
         media_manager = self._create_media_manager(streams)
         display_manager = self._create_display_manager(streams)
@@ -90,7 +98,7 @@ class SmartCCTV:
 
         self._stream_manager = StreamManager(
             action_manager,
-            ai_manager,
+            ai_manager_dict,
             display_manager,
             media_manager,
             self.model,
