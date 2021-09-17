@@ -26,17 +26,8 @@ class OnNewPrediction():
         self.display_manager = display_manager
 
     def __call__(self, prediction, image, media):
+        self.display_manager.push_image(image, media)
         self.action_manager.execute(prediction, image, media)
-        self.display_manager.push_image(image, media)
-
-
-class OnNewPredictionMocked():
-    def __init__(self, action_manager, display_manager):
-        self.action_manager = action_manager
-        self.display_manager = display_manager
-
-    def __call__(self, prediction, image, media):
-        self.display_manager.push_image(image, media)
 
 
 class StreamManagerError(RuntimeError):
@@ -73,7 +64,7 @@ class StreamManager():
         self.action_manager = action_manager
         self.display_manager = display_manager
 
-        cb_prediction_mocked = OnNewPredictionMocked(None, display_manager)
+        cb_prediction = OnNewPrediction(action_manager, display_manager)
         cb = {}
         for key in ai_manager_dict:
             cb.update({key: OnNewImage(
@@ -82,7 +73,7 @@ class StreamManager():
                 disp_width,
                 disp_height)})
 
-            self.ai_manager_dict[key].install_callback(cb_prediction_mocked)
+            self.ai_manager_dict[key].install_callback(cb_prediction)
 
         self.media_manager.install_callback(cb)
 
