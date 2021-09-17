@@ -72,7 +72,7 @@ class TestGstRecordingMedia(unittest.TestCase):
         reader = cv.VideoCapture(filename)
         self.assertEqual(True, reader.isOpened())
 
-        for i in range(num_bufs - 1):
+        for i in range(num_bufs):
             ret, frame = reader.read()
             self.assertEqual(True, ret)
             self.assertEqual(True, frame is not None)

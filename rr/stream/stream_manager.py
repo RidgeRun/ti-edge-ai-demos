@@ -87,8 +87,8 @@ class StreamManager():
         """
 
         try:
-            self.media_manager.stop_media()
             self.display_manager.stop_display()
+            self.media_manager.stop_media()
 
         except Exception as e:
             raise StreamManagerError("Unable to stop the stream") from e

@@ -44,11 +44,6 @@ class SmartCCTV:
         return ActionManager()
 
     def _create_streams(self, config):
-        model_params = self._parse_model_params(config)
-        self.model = model_params['model']['detection']
-        self.disp_width = model_params['disp_width']
-        self.disp_height = model_params['disp_height']
-
         filters = self._parse_filters(config)
         actions = self._parse_actions(config)
         triggers = self._parse_triggers(config, actions, filters)
@@ -75,16 +70,23 @@ class SmartCCTV:
 
         return display_manager
 
-    def _create_ai_manager(self, model, disp_width, disp_height):
-        return AIManagerOnNewImage(model, disp_width, disp_height)
+    def _create_ai_manager(self, config):
+        model_params = self._parse_model_params(config)
+        self.model = model_params['model']['detection']
+        self.disp_width = model_params['disp_width']
+        self.disp_height = model_params['disp_height']
+
+        return AIManagerOnNewImage(
+            self.model, self.disp_width, self.disp_height)
 
     def __init__(self, config):
+        # Make sure the AI manager is the first class to be created, otherwise
+        # the engine will fail to start
+        ai_manager = self._create_ai_manager(config)
         streams = self._create_streams(config)
         media_manager = self._create_media_manager(streams)
         display_manager = self._create_display_manager(streams)
         action_manager = self._create_action_manager()
-        ai_manager = self._create_ai_manager(
-            self.model, self.disp_width, self.disp_height)
 
         self._stream_manager = StreamManager(
             action_manager,
