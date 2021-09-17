@@ -11,9 +11,6 @@ from gi.repository import Gst as gst  # nopep8
 from gi.repository import GLib  # nopep8
 
 
-SECONDS_TO_NANOSECONDS = 1000000000
-
-
 class GstMediaError(RuntimeError):
     pass
 
@@ -106,13 +103,12 @@ class GstMedia():
         """
 
         # Nothing to be done if the pipe is not running
-        print("Stopping media...")
         ret, current, pending = self._pipeline.get_state(gst.CLOCK_TIME_NONE)
         if current != gst.State.PLAYING:
             return
 
         # Send an EOS and wait 5 seconds for the EOS to arrive before closing
-        timeout = 5 * SECONDS_TO_NANOSECONDS
+        timeout = 5000000000  # 5 seconds in nanoseconds
         self._pipeline.send_event(gst.Event.new_eos())
         self._pipeline.get_bus().timed_pop_filtered(timeout, gst.MessageType.EOS)
 
@@ -172,11 +168,7 @@ class GstMedia():
 
     @classmethod
     def make(cls, desc, all_triggers):
-        pipe = '''uridecodebin uri=%s caps=video/x-h264 ! queue !
-                  h264parse ! v4l2h264dec capture-io-mode=5 ! video/x-raw,format=NV12 ! queue !
-                  tiovxmultiscaler  src_0::pool-size=8 sink::pool-size=8 ! tiovxcolorconvert out-pool-size=8 !
-                  video/x-raw,width=320,height=240,format=RGB ! queue !
-                  appsink sync=true qos=false emit-signals=true drop=true max-buffers=3 name=appsink''' % (
+        pipe = 'uridecodebin uri=%s caps=video/x-h264 ! queue ! h264parse ! v4l2h264dec capture-io-mode=5 ! video/x-raw,format=NV12 ! tiovxmultiscaler src_0::pool-size=16 sink::pool-size=16 ! tiovxcolorconvert in-pool-size=16 out-pool-size=16 ! video/x-raw,width=320,height=240,format=RGB ! queue ! appsink sync=true async=false max-buffers=3 qos=false emit-signals=true drop=true name=appsink' % (
             desc["uri"])
         media = GstMedia()
         media.create_media(desc['id'], pipe)
