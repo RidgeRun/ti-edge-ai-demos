@@ -6,24 +6,24 @@ model_params:
 
 streams:
   - id: "stream0"
-    uri: 'rtspt://170.93.143.139/rtplive/1701519c02510075004d823633235daa'
+    uri: 'http://packages.ridgerun.com/ti-edgeai/videos/smart_city_chicago.mp4'
     triggers:
       - vehicle_logging
       - person_recording
 
   - id: "stream1"
-    uri: 'rtspt://170.93.143.139/rtplive/1701519c02510075004d823633235daa'
+    uri: 'http://packages.ridgerun.com/ti-edgeai/videos/smart_city_dubai.mp4'
     triggers:
       - traffic_sign_logging
 
   - id: "stream2"
-    uri: 'rtspt://170.93.143.139/rtplive/1701519c02510075004d823633235daa'
+    uri: 'http://packages.ridgerun.com/ti-edgeai/videos/smart_city_vancouver.mp4'
     triggers:
       - vehicle_logging
       - person_recording
 
   - id: "stream3"
-    uri: 'rtspt://170.93.143.139/rtplive/1701519c02510075004d823633235daa'
+    uri: 'http://packages.ridgerun.com/ti-edgeai/videos/smart_city_new_york.mp4'
     triggers:
       - traffic_sign_logging
 
