@@ -233,3 +233,24 @@ class AIManagerOnNewImage(AIManager):
             inference_results2,
             image2,
             gst_media)
+
+    def process_tensor(self, tensor):
+        """Get a preprocessed tensored image
+
+        Parameters
+        ----------
+        callback: function
+            The callback function to receive the tensor
+
+        Raises
+        ------
+        AIManagerError
+            If couldn't get the tensor
+        """
+
+        self._mutex.acquire()
+
+        # Run the inference
+        inference_results = self.run_inference(tensor.get_data())
+
+        self._mutex.release()

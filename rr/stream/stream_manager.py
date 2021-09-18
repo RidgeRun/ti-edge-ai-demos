@@ -20,6 +20,14 @@ class OnNewImage():
             image, self.model, self.disp_width, self.disp_height)
 
 
+class OnNewTensor():
+    def __init__(self, ai_manager):
+        self.ai_manager = ai_manager
+
+    def __call__(self, tensor):
+        self.ai_manager.process_tensor(tensor)
+
+
 class OnNewPrediction():
     def __init__(self, action_manager, display_manager):
         self.action_manager = action_manager
@@ -65,17 +73,23 @@ class StreamManager():
         self.display_manager = display_manager
 
         cb_prediction = OnNewPrediction(action_manager, display_manager)
-        cb = {}
+        cb_image = {}
+        cb_tensor = {}
         for key in ai_manager_dict:
-            cb.update({key: OnNewImage(
+            on_new_image_cb = {key: OnNewImage(
                 ai_manager_dict[key],
                 model,
                 disp_width,
-                disp_height)})
+                disp_height)}
+
+            on_new_tensor_cb = {key: OnNewTensor(ai_manager_dict[key])}
+
+            cb_image.update(on_new_image_cb)
+            cb_tensor.update(on_new_tensor_cb)
 
             self.ai_manager_dict[key].install_callback(cb_prediction)
 
-        self.media_manager.install_callbacks(cb)
+        self.media_manager.install_image_callback(cb_image)
 
     def play(self):
         """
