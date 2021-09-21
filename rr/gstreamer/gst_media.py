@@ -227,7 +227,7 @@ class GstMedia():
                   tiovxmultiscaler src_0::pool-size=16 sink::pool-size=16 ! tiovxcolorconvert in-pool-size=16 out-pool-size=16 ! video/x-raw,width=320,height=240,format=RGB ! tee name=t
                   t. ! queue ! appsink sync=true async=false max-buffers=3 qos=false emit-signals=true drop=true name=%s
                   t. ! queue ! videoscale ! video/x-raw,width=%s,height=%s,format=RGB ! perf !
-                               tiovxdlpreproc mean-0=%f mean-1=%f mean-2=%f scale-0=%f scale-1=%f scale-2=%f data-type=float32 channel-order=nhwc tensor-format=rgb ! application/x-tensor-tiovx !
+                               tiovxdlpreproc in-pool-size=16 out-pool-size=16 mean-0=%f mean-1=%f mean-2=%f scale-0=%f scale-1=%f scale-2=%f data-type=float32 channel-order=nhwc tensor-format=rgb ! application/x-tensor-tiovx !
                                appsink sync=true async=false max-buffers=3 qos=false emit-signals=true drop=true name=%s''' % (desc["uri"],
                                                                                                                                image_appsink_name,
                                                                                                                                *(model_resize),
