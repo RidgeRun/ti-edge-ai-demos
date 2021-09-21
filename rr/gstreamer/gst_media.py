@@ -226,14 +226,15 @@ class GstMedia():
         pipe = '''uridecodebin uri=%s caps=video/x-h264 ! queue ! h264parse ! v4l2h264dec capture-io-mode=5 ! video/x-raw,format=NV12 !
                   tiovxmultiscaler src_0::pool-size=16 sink::pool-size=16 ! tiovxcolorconvert in-pool-size=16 out-pool-size=16 ! video/x-raw,width=320,height=240,format=RGB ! tee name=t
                   t. ! queue ! appsink sync=true async=false max-buffers=3 qos=false emit-signals=true drop=true name=%s
-                  t. ! queue ! videoscale ! video/x-raw,width=%s,height=%s,format=RGB !
-                               tiovxdlpreproc mean-0=%s mean-1=%s mean-2=%s scale-0=%s scale-1=%s scale-2=%s data-type=10 channel-order=1 tensor-format=0 ! application/x-tensor-tiovx !
+                  t. ! queue ! videoscale ! video/x-raw,width=%s,height=%s,format=RGB ! perf !
+                               tiovxdlpreproc mean-0=%f mean-1=%f mean-2=%f scale-0=%f scale-1=%f scale-2=%f data-type=float32 channel-order=nhwc tensor-format=rgb ! application/x-tensor-tiovx !
                                appsink sync=true async=false max-buffers=3 qos=false emit-signals=true drop=true name=%s''' % (desc["uri"],
                                                                                                                                image_appsink_name,
                                                                                                                                *(model_resize),
                                                                                                                                *(model_mean),
                                                                                                                                *(model_scale),
                                                                                                                                tensor_appsink_name)
+
         media = GstMedia()
         media.create_media(desc['id'], pipe)
 
