@@ -24,8 +24,8 @@ class OnNewTensor():
     def __init__(self, ai_manager):
         self.ai_manager = ai_manager
 
-    def __call__(self, tensor):
-        self.ai_manager.process_tensor(tensor)
+    def __call__(self, buffer_tensor):
+        self.ai_manager.process_tensor(buffer_tensor)
 
 
 class OnNewPrediction():
