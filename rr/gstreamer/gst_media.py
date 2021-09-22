@@ -172,7 +172,6 @@ class GstMedia():
         try:
             appsink = self._pipeline.get_by_name(tensor_appsink_name)
             appsink.connect("new-sample", self._on_new_tensor, appsink)
-
         except AttributeError as e:
             raise GstMediaError("Unable to install tensor callback") from e
 
@@ -180,19 +179,19 @@ class GstMedia():
         sample = appsink.emit("pull-sample")
 
         caps = sample.get_caps()
-        width, height, format = (caps.get_structure(0).get_value("width"),
-                                 caps.get_structure(0).get_value("height"),
-                                 caps.get_structure(0).get_value("format")
+        width, height, format = (caps.get_structure(0).get_value("tensor-width"),
+                                 caps.get_structure(0).get_value("tensor-height"),
+                                 caps.get_structure(0).get_value("tensor-format")
                                  )
 
-        gst_image = GstImage(
+        buffer_tensor = GstImage(
             width,
             height,
             format,
             sample,
             self)
 
-        self.tensor_callback(gst_image)
+        self.tensor_callback(buffer_tensor)
 
         return gst.FlowReturn.OK
 
