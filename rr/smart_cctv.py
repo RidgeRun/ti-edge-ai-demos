@@ -84,7 +84,7 @@ class SmartCCTV:
             self.model, self.disp_width, self.disp_height)
 
     def __init__(self, config):
-        # Make sure the AI manager is the first class to be created, otherwise
+        # Make sure the AI managers are the first classes to be created, otherwise
         # the engine will fail to start
         ai_manager_dict = {}
         for key in self._parse_streams(config):
