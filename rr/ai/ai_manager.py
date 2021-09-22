@@ -234,7 +234,7 @@ class AIManagerOnNewImage(AIManager):
             image2,
             gst_media)
 
-    def process_tensor(self, tensor):
+    def process_tensor(self, buffer_tensor):
         """Get a preprocessed tensored image
 
         Parameters
@@ -251,6 +251,11 @@ class AIManagerOnNewImage(AIManager):
         self._mutex.acquire()
 
         # Run the inference
-        inference_results = self.run_inference(tensor.get_data())
+        tensor = ImageHandler.buffer_to_tensor(
+            buffer_tensor.get_data(),
+            buffer_tensor.get_width(),
+            buffer_tensor.get_height())
+
+        inference_results = self.run_inference(tensor)
 
         self._mutex.release()
