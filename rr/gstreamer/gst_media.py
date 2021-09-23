@@ -158,7 +158,22 @@ class GstMedia():
             sample,
             self)
 
-        self.image_callback(gst_image)
+        # Bind the tensor pull
+        tensor_appsink = self._pipeline.get_by_name(tensor_appsink_name)
+        tensor_sample = tensor_appsink.emit("pull-sample")
+
+        tensor_caps = tensor_sample.get_caps()
+        tensor_width, tensor_height, tensor_format = (tensor_caps.get_structure(0).get_value(
+            "tensor-width"), tensor_caps.get_structure(0).get_value("tensor-height"), tensor_caps.get_structure(0).get_value("tensor-format"))
+
+        gst_tensor = GstImage(
+            tensor_width,
+            tensor_height,
+            tensor_format,
+            tensor_sample,
+            self)
+
+        self.image_callback(gst_image, gst_tensor)
 
         return gst.FlowReturn.OK
 
