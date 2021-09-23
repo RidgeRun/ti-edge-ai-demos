@@ -75,7 +75,7 @@ class StreamManager():
 
             self.ai_manager_dict[key].install_callback(cb_prediction)
 
-        self.media_manager.install_callback(cb)
+        self.media_manager.install_callbacks(cb)
 
     def play(self):
         """
