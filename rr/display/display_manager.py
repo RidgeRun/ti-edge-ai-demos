@@ -141,7 +141,7 @@ class DisplayManager():
         desc += " ! kmssink force-modesetting=true sync=false async=false qos=false "
 
         for key in self._list:
-            desc += " appsrc is-live=true do-timestamp=true name=%s format=time ! video/x-raw,width=%s,height=%s,framerate=30/1,pixel-aspect-ratio=1/1,format=RGB ! perf ! mixer. " % (
+            desc += " appsrc is-live=true do-timestamp=true name=%s format=time ! video/x-raw,width=%s,height=%s,framerate=30/1,pixel-aspect-ratio=1/1,format=RGB ! mixer. " % (
                 key, str(w), str(h))
 
         self._display_desc = desc
