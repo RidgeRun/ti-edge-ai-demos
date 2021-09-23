@@ -101,11 +101,6 @@ class GstMedia():
         if self.image_callback is not None:
             self.install_buffer_callback()
 
-        # Install the callback that passes the new tensor from the AppSink to a
-        # client
-        if self.tensor_callback is not None:
-            self.install_tensor_buffer_callback()
-
     def stop_media(self):
         """Set the media state to stopped
         Raises
@@ -174,39 +169,6 @@ class GstMedia():
             self)
 
         self.image_callback(gst_image, gst_tensor)
-
-        return gst.FlowReturn.OK
-
-    def install_tensor_callback(self, callback):
-        if callback is None:
-            raise GstMediaError("Invalid callback")
-
-        self.tensor_callback = callback
-
-    def install_tensor_buffer_callback(self):
-        try:
-            appsink = self._pipeline.get_by_name(tensor_appsink_name)
-            appsink.connect("new-sample", self._on_new_tensor, appsink)
-        except AttributeError as e:
-            raise GstMediaError("Unable to install tensor callback") from e
-
-    def _on_new_tensor(self, appsink, data):
-        sample = appsink.emit("pull-sample")
-
-        caps = sample.get_caps()
-        width, height, format = (caps.get_structure(0).get_value("tensor-width"),
-                                 caps.get_structure(0).get_value("tensor-height"),
-                                 caps.get_structure(0).get_value("tensor-format")
-                                 )
-
-        buffer_tensor = GstImage(
-            width,
-            height,
-            format,
-            sample,
-            self)
-
-        self.tensor_callback(buffer_tensor)
 
         return gst.FlowReturn.OK
 
