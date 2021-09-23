@@ -191,7 +191,7 @@ class AIManagerOnNewImage(AIManager):
     def install_callback(self, on_new_prediction_cb_):
         self.on_new_prediction_cb_ = on_new_prediction_cb_
 
-    def process_image(self, image, model, disp_width, disp_height):
+    def process_image(self, image, gst_tensor, model, disp_width, disp_height):
         """Get a image input
 
         Parameters
@@ -210,9 +210,14 @@ class AIManagerOnNewImage(AIManager):
         img = ImageHandler.buffer_to_np_array(
             image.get_data(), image.get_width(), image.get_height())
 
-        image_preprocessed = self.preprocess_detection(img)
+        # Run the inference
+        tensor = ImageHandler.buffer_to_tensor(
+            gst_tensor.get_data(),
+            gst_tensor.get_width(),
+            gst_tensor.get_height())
 
-        inference_results = self.run_inference(image_preprocessed)
+        inference_results = self.run_inference(tensor)
+
         image_postprocessed = self.postprocess_detection(
             img, inference_results)
 
@@ -233,29 +238,3 @@ class AIManagerOnNewImage(AIManager):
             inference_results2,
             image2,
             gst_media)
-
-    def process_tensor(self, buffer_tensor):
-        """Get a preprocessed tensored image
-
-        Parameters
-        ----------
-        callback: function
-            The callback function to receive the tensor
-
-        Raises
-        ------
-        AIManagerError
-            If couldn't get the tensor
-        """
-
-        self._mutex.acquire()
-
-        # Run the inference
-        tensor = ImageHandler.buffer_to_tensor(
-            buffer_tensor.get_data(),
-            buffer_tensor.get_width(),
-            buffer_tensor.get_height())
-
-        inference_results = self.run_inference(tensor)
-
-        self._mutex.release()
