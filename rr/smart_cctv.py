@@ -53,6 +53,7 @@ class SmartCCTV:
         triggers = self._parse_triggers(config, actions, filters)
 
         streams = []
+        GstMedia.learn_model_config(self.model, config['model_params'])
         for stream in config['streams']:
             streams.append(GstMedia.make(stream, triggers))
 

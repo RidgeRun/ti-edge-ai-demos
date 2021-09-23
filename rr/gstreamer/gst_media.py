@@ -189,28 +189,40 @@ class GstMedia():
         return self._triggers
 
     @classmethod
+    def learn_model_config(cls, model, model_params):
+        GstMedia.model = model
+        GstMedia.model_params = model_params
+
+        GstMedia.ai_model_config = GetConfigYaml(cls.model)
+
+    @classmethod
     def make(cls, desc, all_triggers):
         # Parse parameters from model
-        model_config = GetConfigYaml(model)
+        model_resize = cls.ai_model_config.params.resize
+        model_mean = cls.ai_model_config.params.mean
+        model_scale = cls.ai_model_config.params.scale
+        model_channel_format = cls.ai_model_config.params.data_layout
+        model_channel_axis = cls.ai_model_config.params.data_layout.index('C')
 
-        model_resize = model_config.params.resize
-        model_mean = model_config.params.mean
-        model_scale = model_config.params.scale
-        model_channel_format = model_config.params.data_layout
-        model_channel_axis = model_config.params.data_layout.index('C')
+        # Parse parameters from server model params
+        disp_w = cls.model_params['disp_width']
+        disp_h = cls.model_params['disp_height']
 
         pipe = '''
                 uridecodebin uri=%s caps=video/x-h264 ! queue ! h264parse ! v4l2h264dec capture-io-mode=5 ! video/x-raw,format=NV12 !
-                tiovxmultiscaler src_0::pool-size=16 sink::pool-size=16 !  video/x-raw,width=320,height=240 ! tiovxcolorconvert in-pool-size=16 out-pool-size=16 ! video/x-raw,format=RGB ! tee name=t
+                tiovxmultiscaler src_0::pool-size=16 sink::pool-size=16 !  video/x-raw,width=%d,height=%d ! tiovxcolorconvert in-pool-size=16 out-pool-size=16 ! video/x-raw,format=RGB ! tee name=t
                           t. ! queue leaky=1 ! appsink sync=true async=false sync=true max-buffers=2 qos=false emit-signals=true drop=true name=%s
                           t. ! queue leaky=1 ! videoscale ! video/x-raw,width=%s,height=%s,format=RGB !
-                                        tiovxdlpreproc in-pool-size=16 out-pool-size=16 qos=false mean-0=%f mean-1=%f mean-2=%f scale-0=%f scale-1=%f scale-2=%f data-type=float32 channel-order=nhwc tensor-format=rgb ! application/x-tensor-tiovx !
-                                        appsink sync=true async=false max-buffers=2 qos=false emit-signals=true drop=true name=%s
+                                        tiovxdlpreproc in-pool-size=16 out-pool-size=16 qos=false mean-0=%f mean-1=%f mean-2=%f scale-0=%f scale-1=%f scale-2=%f data-type=float32 channel-order=%s tensor-format=rgb ! application/x-tensor-tiovx !
+                                        perf ! appsink sync=true async=false max-buffers=2 qos=false emit-signals=true drop=true name=%s
                ''' % (desc["uri"],
+                      disp_w,
+                      disp_h,
                       image_appsink_name,
                       *(model_resize),
                       *(model_mean),
                       *(model_scale),
+                      model_channel_format.lower(),
                       tensor_appsink_name)
 
         media = GstMedia()
