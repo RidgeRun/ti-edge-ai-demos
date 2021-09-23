@@ -15,17 +15,13 @@ class OnNewImage():
         self.disp_width = disp_width
         self.disp_height = disp_height
 
-    def __call__(self, image):
+    def __call__(self, gst_image, gst_tensor):
         self.ai_manager.process_image(
-            image, self.model, self.disp_width, self.disp_height)
-
-
-class OnNewTensor():
-    def __init__(self, ai_manager):
-        self.ai_manager = ai_manager
-
-    def __call__(self, buffer_tensor):
-        self.ai_manager.process_tensor(buffer_tensor)
+            gst_image,
+            gst_tensor,
+            self.model,
+            self.disp_width,
+            self.disp_height)
 
 
 class OnNewPrediction():
@@ -74,7 +70,6 @@ class StreamManager():
 
         cb_prediction = OnNewPrediction(action_manager, display_manager)
         cb_image = {}
-        cb_tensor = {}
         for key in ai_manager_dict:
             on_new_image_cb = {key: OnNewImage(
                 ai_manager_dict[key],
@@ -82,10 +77,7 @@ class StreamManager():
                 disp_width,
                 disp_height)}
 
-            on_new_tensor_cb = {key: OnNewTensor(ai_manager_dict[key])}
-
             cb_image.update(on_new_image_cb)
-            cb_tensor.update(on_new_tensor_cb)
 
             self.ai_manager_dict[key].install_callback(cb_prediction)
 
