@@ -119,10 +119,10 @@ class MediaManager():
             except MediaError as e:
                 raise MediaManagerError("Unable to stop media") from e
 
-    def install_callback(self, callback):
-        for key in self._Dict:
+    def install_callbacks(self, callback):
+        for key, MediaObjects in self._Dict.items():
             try:
-                self._Dict[key].install_callback(callback)
+                MediaObjects.install_callback(callback[key])
             except MediaError as e:
                 raise MediaManagerError("Unable to install callback") from e
 
