@@ -122,7 +122,7 @@ class MediaManager():
     def install_image_callback(self, callback):
         for key, MediaObjects in self._Dict.items():
             try:
-                MediaObjects.install_callback(callback[key])
+                MediaObjects.install_image_callback(callback[key])
             except MediaError as e:
                 raise MediaManagerError(
                     "Unable to install the image callback") from e
