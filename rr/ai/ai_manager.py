@@ -93,10 +93,6 @@ class AIManager():
         # Make a warmup run to start the engine
         self._model_channel_axis = self._model_config.params.data_layout.index(
             'C')
-        self.inference_obj.run(np.zeros((1,
-                                         *(self._model_config.params.resize),
-                                         self._model_channel_axis),
-                                        dtype='float32'))
 
     def preprocess_detection(self, image):
         """Preprocess the image
@@ -213,6 +209,7 @@ class AIManagerOnNewImage(AIManager):
         # Run the inference
         tensor = ImageHandler.buffer_to_tensor(
             gst_tensor.get_data(),
+            gst_tensor.get_data_layout(),
             gst_tensor.get_width(),
             gst_tensor.get_height())
 
@@ -229,7 +226,7 @@ class AIManagerOnNewImage(AIManager):
         sample = image.get_sample()
         caps = sample.get_caps()
         sample2 = GstUtils.sample_new(buffer, caps)
-        image2 = GstImage(w, h, "RGB", sample2, image.get_media())
+        image2 = GstImage(None, w, h, "RGB", sample2, image.get_media())
 
         classname = self.get_classname()
         inference_results2 = format_inf_results(classname, inference_results)
