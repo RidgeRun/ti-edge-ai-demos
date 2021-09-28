@@ -147,6 +147,7 @@ class GstMedia():
                                  )
 
         gst_image = GstImage(
+            None,
             width,
             height,
             format,
@@ -160,8 +161,11 @@ class GstMedia():
         tensor_caps = tensor_sample.get_caps()
         tensor_width, tensor_height, tensor_format = (tensor_caps.get_structure(0).get_value(
             "tensor-width"), tensor_caps.get_structure(0).get_value("tensor-height"), tensor_caps.get_structure(0).get_value("tensor-format"))
+        tensor_data_layout = tensor_caps.get_structure(
+            0).get_value("channel-order")
 
         gst_tensor = GstImage(
+            tensor_data_layout,
             tensor_width,
             tensor_height,
             tensor_format,
@@ -213,7 +217,7 @@ class GstMedia():
                 tiovxmultiscaler src_0::pool-size=16 sink::pool-size=16 !  video/x-raw,width=%d,height=%d ! tiovxcolorconvert in-pool-size=16 out-pool-size=16 ! video/x-raw,format=RGB ! tee name=t
                           t. ! queue leaky=1 ! appsink sync=true async=false sync=true max-buffers=2 qos=false emit-signals=true drop=true name=%s
                           t. ! queue leaky=1 ! videoscale ! video/x-raw,width=%s,height=%s,format=RGB !
-                                        tiovxdlpreproc in-pool-size=16 out-pool-size=16 qos=false mean-0=%f mean-1=%f mean-2=%f scale-0=%f scale-1=%f scale-2=%f data-type=float32 channel-order=%s tensor-format=rgb ! application/x-tensor-tiovx !
+                                        tiovxdlpreproc in-pool-size=16 out-pool-size=16 qos=false mean-0=%f mean-1=%f mean-2=%f scale-0=%f scale-1=%f scale-2=%f data-type=float32 channel-order=nchw tensor-format=rgb ! application/x-tensor-tiovx !
                                         perf ! appsink sync=true async=false max-buffers=2 qos=false emit-signals=true drop=true name=%s
                ''' % (desc["uri"],
                       disp_w,
@@ -222,7 +226,6 @@ class GstMedia():
                       *(model_resize),
                       *(model_mean),
                       *(model_scale),
-                      model_channel_format.lower(),
                       tensor_appsink_name)
 
         media = GstMedia()
@@ -245,13 +248,21 @@ class GstMedia():
 
 
 class GstImage():
-    def __init__(self, width, height, format, sample, gst_media_obj):
+    def __init__(
+            self,
+            tensor_data_layout,
+            width,
+            height,
+            format,
+            sample,
+            gst_media_obj):
         self.sample = sample
         self.gst_media_obj = gst_media_obj
 
         self._gst_memory_obj = None
         self.minfo = None
 
+        self.tensor_data_layout = tensor_data_layout
         self.width = width
         self.height = height
         self.format = format
@@ -259,6 +270,9 @@ class GstImage():
         # Map the buffer
         self.map_flags = gst.MapFlags.READ
         self._map_buffer()
+
+    def get_data_layout(self):
+        return self.tensor_data_layout
 
     def get_width(self):
         return self.width
