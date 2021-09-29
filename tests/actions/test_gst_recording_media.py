@@ -21,7 +21,7 @@ import cv2 as cv
 
 width = 320
 height = 240
-fmt = 'RGBA'
+fmt = 'RGB'
 size = 320 * 240 * 4
 
 

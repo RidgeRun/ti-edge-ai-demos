@@ -18,7 +18,7 @@ from rr.actions.record_event import RecordEvent
 
 width = 320
 height = 240
-fmt = "RGBA"
+fmt = "RGB"
 size = 320 * 240 * 4
 data = np.zeros((size))
 
