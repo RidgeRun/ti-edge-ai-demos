@@ -19,7 +19,9 @@ from rr.config.app_config_loader import AppConfigLoader
 from rr.gstreamer.gst_media import GstImage
 from rr.gstreamer.gst_media import GstMedia
 from rr.gstreamer.gst_media import GstUtils
+from bin.utils.getconfig import GetConfigYaml
 from bin.utils.imagehandler import ImageHandler
+
 
 default_config_file = "config.yaml"
 width = 1920
@@ -102,6 +104,12 @@ class TestAIManagerOnNewImage(unittest.TestCase):
         self.disp_width = model_params['disp_width']
         self.disp_height = model_params['disp_height']
 
+        # Parse info from AI model
+        _ai_model_config = GetConfigYaml(self.model)
+        self.ai_model_resize = _ai_model_config.params.resize
+        self.ai_model_resize_w, self.ai_model_resize_h = tuple(
+            self.ai_model_resize)
+
         self.mock_image = MockImage(width, height, color)
         self.img = self.mock_image.get_image()
 
@@ -119,6 +127,18 @@ class TestAIManagerOnNewImage(unittest.TestCase):
         image.get_width = MagicMock(return_value=w)
         image.get_height = MagicMock(return_value=h)
 
+        gst_tensor = MagicMock()
+        img_resized = cv2.resize(
+            self.img,
+            tuple(
+                self.ai_model_resize),
+            interpolation=cv2.INTER_LINEAR)
+        tensor = ImageHandler.image_to_tensor(img_resized, np.float32)
+
+        gst_tensor.get_data = MagicMock(return_value=tensor.tobytes())
+        gst_tensor.get_width = MagicMock(return_value=self.ai_model_resize_w)
+        gst_tensor.get_height = MagicMock(return_value=self.ai_model_resize_h)
+
         gst_media_obj = GstMedia()
         desc = "videotestsrc is-live=true ! fakesink async=false"
         gst_media_obj.create_media("name", desc)
@@ -132,7 +152,7 @@ class TestAIManagerOnNewImage(unittest.TestCase):
         cb = MagicMock(None, self.img, gst_media_obj)
         self.ai_manager.install_callback(cb)
         self.ai_manager.process_image(
-            image, self.model, self.disp_width, self.disp_height)
+            image, gst_tensor, self.model, self.disp_width, self.disp_height)
 
 
 if __name__ == '__main__':
