@@ -127,13 +127,5 @@ class MediaManager():
                 raise MediaManagerError(
                     "Unable to install the image callback") from e
 
-    def install_tensor_callback(self, callback):
-        for key in self._Dict:
-            try:
-                self._Dict[key].install_tensor_callback(callback[key])
-            except MediaError as e:
-                raise MediaManagerError(
-                    "Unable to install the tensor callback") from e
-
     def _get_media_dict(self):
         return self._Dict
