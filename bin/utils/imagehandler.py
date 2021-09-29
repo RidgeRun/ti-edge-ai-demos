@@ -51,16 +51,8 @@ class ImageHandler:
         return img
 
     def buffer_to_tensor(data, data_layout, width, height):
-        if ("NHWC" == data_layout):
-            tensor = np.ndarray(shape=(1, default_dimentions, height, width),
-                                dtype=np.float32,
-                                buffer=data)
-
-            tensor = np.transpose(tensor, [0, 2, 3, 1])
-
-        elif ("NCHW" == data_layout):
-            tensor = np.ndarray(shape=(1, height, width, default_dimentions),
-                                dtype=np.float32,
-                                buffer=data)
+        tensor = np.ndarray(shape=(1, height, width, default_dimentions),
+                            dtype=np.float32,
+                            buffer=data)
 
         return tensor
