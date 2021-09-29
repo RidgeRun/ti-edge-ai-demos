@@ -159,8 +159,9 @@ class GstMedia():
         tensor_sample = tensor_appsink.emit("pull-sample")
 
         tensor_caps = tensor_sample.get_caps()
-        tensor_width, tensor_height, tensor_format = (tensor_caps.get_structure(0).get_value(
-            "tensor-width"), tensor_caps.get_structure(0).get_value("tensor-height"), tensor_caps.get_structure(0).get_value("tensor-format"))
+        tensor_width = tensor_caps.get_structure(0).get_value("tensor-width")
+        tensor_height = tensor_caps.get_structure(0).get_value("tensor-height")
+        tensor_format = tensor_caps.get_structure(0).get_value("tensor-format")
         tensor_data_layout = tensor_caps.get_structure(
             0).get_value("channel-order")
 
