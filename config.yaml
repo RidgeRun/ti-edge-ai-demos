@@ -2,7 +2,7 @@ model_params:
   disp_width: 320
   disp_height: 240
   model:
-    detection: '/opt/model_zoo/TFL-OD-2000-ssd-mobV1-coco-mlperf-300x300/'
+    detection: '/opt/model_zoo/TFL-OD-2080-ssd-mobV2-fpnlite-coco-tpu-8-320x320/'
 
 streams:
   - id: "stream0"
