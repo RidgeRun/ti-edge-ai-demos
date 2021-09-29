@@ -12,11 +12,8 @@ from gi.repository import GLib  # nopep8
 
 from bin.utils.getconfig import GetConfigYaml
 
-model = '/opt/model_zoo/TFL-OD-2000-ssd-mobV1-coco-mlperf-300x300/'
 image_appsink_name = "image_appsink"
 tensor_appsink_name = "tensor_appsink"
-
-
 SECONDS_TO_NANOSECONDS = 1000000000
 
 
