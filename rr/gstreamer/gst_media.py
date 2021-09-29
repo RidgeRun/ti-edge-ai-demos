@@ -147,7 +147,6 @@ class GstMedia():
                                  )
 
         gst_image = GstImage(
-            None,
             width,
             height,
             format,
@@ -162,11 +161,8 @@ class GstMedia():
         tensor_width = tensor_caps.get_structure(0).get_value("tensor-width")
         tensor_height = tensor_caps.get_structure(0).get_value("tensor-height")
         tensor_format = tensor_caps.get_structure(0).get_value("tensor-format")
-        tensor_data_layout = tensor_caps.get_structure(
-            0).get_value("channel-order")
 
         gst_tensor = GstImage(
-            tensor_data_layout,
             tensor_width,
             tensor_height,
             tensor_format,
@@ -252,7 +248,6 @@ class GstMedia():
 class GstImage():
     def __init__(
             self,
-            tensor_data_layout,
             width,
             height,
             format,
@@ -264,7 +259,6 @@ class GstImage():
         self._gst_memory_obj = None
         self.minfo = None
 
-        self.tensor_data_layout = tensor_data_layout
         self.width = width
         self.height = height
         self.format = format
@@ -272,9 +266,6 @@ class GstImage():
         # Map the buffer
         self.map_flags = gst.MapFlags.READ
         self._map_buffer()
-
-    def get_data_layout(self):
-        return self.tensor_data_layout
 
     def get_width(self):
         return self.width

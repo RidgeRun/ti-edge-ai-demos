@@ -50,7 +50,7 @@ class ImageHandler:
 
         return img
 
-    def buffer_to_tensor(data, data_layout, width, height):
+    def buffer_to_tensor(data, width, height):
         tensor = np.ndarray(shape=(1, height, width, default_dimentions),
                             dtype=np.float32,
                             buffer=data)
