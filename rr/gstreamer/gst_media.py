@@ -190,24 +190,17 @@ class GstMedia():
         return self._triggers
 
     @classmethod
-    def learn_model_config(cls, model, model_params):
-        GstMedia.model = model
-        GstMedia.model_params = model_params
-
-        GstMedia.ai_model_config = GetConfigYaml(cls.model)
-
-    @classmethod
-    def make(cls, desc, all_triggers):
+    def make(cls, desc, all_triggers, configs):
         # Parse parameters from model
-        model_resize = cls.ai_model_config.params.resize
-        model_mean = cls.ai_model_config.params.mean
-        model_scale = cls.ai_model_config.params.scale
-        model_channel_format = cls.ai_model_config.params.data_layout
-        model_channel_axis = cls.ai_model_config.params.data_layout.index('C')
+        model_resize = configs.ai_model.params.resize
+        model_mean = configs.ai_model.params.mean
+        model_scale = configs.ai_model.params.scale
+        model_channel_format = configs.ai_model.params.data_layout
+        model_channel_axis = configs.ai_model.params.data_layout.index('C')
 
         # Parse parameters from server model params
-        disp_w = cls.model_params['disp_width']
-        disp_h = cls.model_params['disp_height']
+        disp_w = configs.model_params['disp_width']
+        disp_h = configs.model_params['disp_height']
 
         pipe = '''
                 uridecodebin uri=%s caps=video/x-h264 ! queue ! h264parse ! v4l2h264dec capture-io-mode=5 ! video/x-raw,format=NV12 !
