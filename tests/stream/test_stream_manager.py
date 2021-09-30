@@ -9,8 +9,11 @@ import time
 import unittest
 from unittest.mock import MagicMock
 
+from bin.utils.getconfig import GetConfigYaml
 from rr.actions.action_manager import ActionManager
-from rr.actions.action_manager import Trigger, TriggerError
+from rr.actions.action_manager import Action
+from rr.actions.action_manager import Filter
+from rr.actions.action_manager import Trigger
 from rr.ai.ai_manager import AIManagerOnNewImage
 from rr.config.app_config_loader import AppConfigLoader
 from rr.display.display_manager import DisplayManager
@@ -18,116 +21,94 @@ from rr.gstreamer.gst_media import GstMedia
 from rr.gstreamer.media_manager import MediaManager
 from rr.stream.stream_manager import OnNewImage
 from rr.stream.stream_manager import StreamManager
-from bin.utils.imagehandler import ImageHandler
 
 
 class MockTriggerMedia:
     pass
 
 
-default_config_file = "config.yaml"
+default_config_file = "tests/test_config.yaml"
 disp_width = 2040
 disp_height = 1920
 default_dimentions = 3
 img_path = "./data/0004.jpg"
 
 
-class MockImage:
-    def __init__(self):
-        img_handler = ImageHandler()
-        self.real_img = img_handler.load_image(img_path)
+class SetUpConfigs:
+    @classmethod
+    def get_configs(cls, config):
+        def configs(): return None
+        configs.model_dir = config['model_params']['model']['detection']
+        configs.model_params = config['model_params']
+        configs.ai_model = GetConfigYaml(configs.model_dir)
 
-    def get_mock_image(self):
-        return self.real_img
-
-
-class MockTriggerFilter1:
-    def __init__(self):
-        self.apply = MagicMock()
-
-    def get_name(self):
-        return "mock_filter1"
+        return configs
 
 
-class MockTriggerFilter2:
-    def __init__(self):
-        self.apply = MagicMock()
+class SetUpStreams:
+    @classmethod
+    def get_streams(cls, config, configs):
+        streams = []
+        actions = []
+        filters = []
+        triggers = []
 
-    def get_name(self):
-        return "mock_filter2"
+        for desc in config['filters']:
+            filters.append(Filter.make(desc))
+
+        for desc in config['actions']:
+            actions.append(Action.make(desc))
+
+        for desc in config['triggers']:
+            triggers.append(Trigger.make(desc, actions, filters))
+
+        for s in config['streams']:
+            streams.append(GstMedia.make(s, triggers, configs))
+
+        return streams
 
 
-class MockTriggerAction:
-    def __init__(self):
-        self.execute = MagicMock()
+class SetUpStreamManager:
+    def __init__(self, streams, model, disp_w, disp_h):
+        self.ai_manager_dict = {}
+        self.media_manager = MediaManager()
+        self.display_manager = DisplayManager()
+        self.action_manager = ActionManager()
 
-    def get_name(self):
-        return "mock_action"
+        for s in streams:
+            self.media_manager.add_media(s.get_name(), s)
+            self.display_manager.add_stream(s)
+            self.ai_manager_dict.update(
+                {s.get_name(): AIManagerOnNewImage(model, disp_w, disp_h)})
 
 
 class TestStreamManager(unittest.TestCase):
     def testsuccess(self):
-
         config_obj = AppConfigLoader()
-        config_dict = config_obj.load(default_config_file)
-        model_params = config_dict['model_params']
+        config = config_obj.load(default_config_file)
 
-        model = model_params['model']['detection']
-        disp_width = model_params['disp_width']
-        disp_height = model_params['disp_height']
+        configs = SetUpConfigs.get_configs(config)
+        streams = SetUpStreams.get_streams(config, configs)
 
-        ai_manager = AIManagerOnNewImage(model, disp_width, disp_height)
+        model = configs.model_dir
+        context = SetUpStreamManager(streams, model, disp_width, disp_height)
 
-        desc = "videotestsrc num-buffers=1 is-live=true ! video/x-raw,width=320,height=240,format=BGRx ! appsink name=appsink async=false emit-signals=true"
-        key = "media1"
-
-        media = GstMedia()
-        media.create_media("name", desc)
-
-        media_manager = MediaManager()
-        media_manager.add_media(key, media)
-
-        # ActionManager setup
-        self.desc = {
-            "name": "trigger_name",
-            "action": "mock_action",
-            "filters": [
-                "mock_filter1",
-                "mock_filter2",
-            ]
-        }
-
-        self.action = MockTriggerAction()
-        self.filter1 = MockTriggerFilter1()
-        self.filter2 = MockTriggerFilter2()
-        self.filters = [self.filter1, self.filter2]
-
-        trigger = Trigger(self.desc, self.action, self.filters)
-        action_manager = ActionManager()
-        display_manager = DisplayManager()
-
-        streams = []
-        streams.append(media)
-        display_manager.add_stream(media)
-
-        prediction = {"mock": "prediction"}
-        img = MockImage()
-        mock_image = img.get_mock_image()
-        action_manager.execute = MagicMock(prediction, mock_image, media)
-
+        context.action_manager.execute = MagicMock()
+        context.display_manager.push_image = MagicMock()
         stream_manager = StreamManager(
-            action_manager,
-            ai_manager,
-            display_manager,
-            media_manager,
+            context.action_manager,
+            context.ai_manager_dict,
+            context.display_manager,
+            context.media_manager,
             model,
             disp_width,
             disp_height)
 
         stream_manager.play()
-        time.sleep(1)
+        time.sleep(2)
 
-        action_manager.execute.assert_called_once()
+        context.action_manager.execute.assert_called()
+        context.display_manager.push_image.assert_called()
 
 
 if __name__ == '__main__':

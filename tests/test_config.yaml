@@ -1,0 +1,64 @@
+model_params:
+  disp_width: 320
+  disp_height: 240
+  model:
+    detection: '/opt/model_zoo/TFL-OD-2080-ssd-mobV2-fpnlite-coco-tpu-8-320x320/'
+
+streams:
+  - id: "stream0"
+    uri: 'http://packages.ridgerun.com/ti-edgeai/videos/smart_city_new_york.mp4'
+    triggers:
+      - person_logging
+
+filters:
+  - name: truck_filter
+    labels:
+      - vehicle/truck
+    threshold: 0.3
+
+  - name: car_filter
+    labels:
+      - vehicle/car
+    threshold: 0.5
+
+  - name: motorcycle_filter
+    labels:
+      - vehicle/motorcycle
+    threshold: 0.7
+
+  - name: traffic_sign_filter
+    labels:
+      - 'outdoor/traffic light'
+      - 'outdoor/stop sign'
+    threshold: 0.5
+
+  - name: person_filter
+    labels:
+      - person/person
+    threshold: 0.7
+
+actions:
+  - name: record_event
+    type: record_event
+    length: 10
+    location: /tmp/
+
+  - name: log_event
+    type: log_event
+    location: /tmp/log.csv
+
+triggers:
+  - name: person_logging
+    action: log_event
+    filters:
+      - person_filter
+
+  - name: person_recording
+    action: record_event
+    filters:
+      - person_filter
+
+  - name: traffic_sign_logging
+    action: log_event
+    filters:
+      - traffic_sign_filter

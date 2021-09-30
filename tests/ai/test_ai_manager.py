@@ -23,7 +23,7 @@ from bin.utils.getconfig import GetConfigYaml
 from bin.utils.imagehandler import ImageHandler
 
 
-default_config_file = "config.yaml"
+default_config_file = "tests/test_config.yaml"
 width = 1920
 height = 1080
 color = (100, 100, 100)
