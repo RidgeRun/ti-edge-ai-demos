@@ -202,18 +202,20 @@ class GstMedia():
         disp_w = configs.model_params['disp_width']
         disp_h = configs.model_params['disp_height']
 
+        sort_target = (1 if 0 == (int(desc["id"][-1]) % 2) else 2)
         pipe = '''
-                uridecodebin uri=%s caps=video/x-h264 ! queue ! h264parse ! v4l2h264dec capture-io-mode=5 ! video/x-raw,format=NV12 !
-                tiovxmultiscaler src_0::pool-size=16 sink::pool-size=16 !  video/x-raw,width=%d,height=%d ! tiovxcolorconvert in-pool-size=16 out-pool-size=16 ! video/x-raw,format=RGB ! tee name=t
-                          t. ! queue leaky=1 ! appsink sync=true async=false sync=true max-buffers=2 qos=false emit-signals=true drop=true name=%s
-                          t. ! queue leaky=1 ! videoscale ! video/x-raw,width=%s,height=%s,format=RGB !
-                                        tiovxdlpreproc in-pool-size=16 out-pool-size=16 qos=false mean-0=%f mean-1=%f mean-2=%f scale-0=%f scale-1=%f scale-2=%f data-type=float32 channel-order=%s tensor-format=rgb ! application/x-tensor-tiovx !
-                                        perf ! appsink sync=true async=false max-buffers=2 qos=false emit-signals=true drop=true name=%s
+                uridecodebin uri=%s caps=video/x-h264 ! queue max-size-buffers=3 ! h264parse ! v4l2h264dec capture-io-mode=5 ! video/x-raw,format=NV12 !
+                tiovxmultiscaler target=VPAC_MSC%d name=multi sink::pool-size=5 src_0::pool-size=2 src_1::pool-size=2
+                multi.src_0 ! queue max-size-buffers=3 ! video/x-raw,width=%d,height=%d ! tiovxcolorconvert target=DSP-%d in-pool-size=2 out-pool-size=2 ! video/x-raw,format=RGB ! perf ! appsink sync=true async=false sync=true max-buffers=2 qos=false emit-signals=true drop=true name=%s
+                multi.src_1 ! queue max-size-buffers=3 ! video/x-raw,width=%d,height=%d ! tiovxdlpreproc target=DSP-%d in-pool-size=2 out-pool-size=2 qos=false mean-0=%f mean-1=%f mean-2=%f scale-0=%f scale-1=%f scale-2=%f data-type=float32 channel-order=%s tensor-format=rgb ! application/x-tensor-tiovx !
+                perf ! appsink sync=true async=false max-buffers=2 qos=false emit-signals=true drop=true name=%s
                ''' % (desc["uri"],
-                      disp_w,
-                      disp_h,
+                      sort_target,
+                      *(model_resize),
+                      sort_target,
                       image_appsink_name,
                       *(model_resize),
+                      sort_target,
                       *(model_mean),
                       *(model_scale),
                       model_channel_format.lower(),
