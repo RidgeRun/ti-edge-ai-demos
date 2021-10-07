@@ -8,7 +8,7 @@ from rr.gstreamer.gst_media import GstMedia
 from rr.gstreamer.gst_media import GstMediaError
 
 w = 320
-h = 240
+h = 320
 img_format = 'RGB'
 
 MAX_STREAMS = 8

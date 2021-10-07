@@ -1,6 +1,6 @@
 model_params:
   disp_width: 320
-  disp_height: 240
+  disp_height: 320
   model:
     detection: '/opt/model_zoo/TFL-OD-2080-ssd-mobV2-fpnlite-coco-tpu-8-320x320/'
 
