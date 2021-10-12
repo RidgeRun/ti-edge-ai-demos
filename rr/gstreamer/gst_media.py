@@ -71,6 +71,10 @@ class GstMedia():
             If the description fails to create the media
         """
 
+        print ("Creating media:")
+        print ("   Name: " + name)
+        print ("   Description: " + desc)
+
         try:
             self._pipeline = gst.parse_launch(desc)
             self._name = name
@@ -109,19 +113,24 @@ class GstMedia():
             If couldn't set the media state to stopped
         """
 
+        print ("Stopping media: " + self._name)
         # Nothing to be done if the pipe is not running
         ret, current, pending = self._pipeline.get_state(gst.CLOCK_TIME_NONE)
         if current != gst.State.PLAYING:
             return
 
         # Send an EOS and wait 5 seconds for the EOS to arrive before closing
-        timeout = 5 * SECONDS_TO_NANOSECONDS
-        self._pipeline.send_event(gst.Event.new_eos())
+        timeout = 3 * SECONDS_TO_NANOSECONDS
+        print ("Sending EOS: " + self._name)
+        eos = self._pipeline.get_by_name("eos")
+        eos.send_event(gst.Event.new_eos())
         self._pipeline.get_bus().timed_pop_filtered(timeout, gst.MessageType.EOS)
 
+        print ("Setting pipeline to NULL: " + self._name)
         ret = self._pipeline.set_state(gst.State.NULL)
         if gst.StateChangeReturn.FAILURE == ret:
             raise GstMediaError("Unable to stop the media")
+        print ("Media Stopped: " + self._name)
 
     def install_image_callback(self, callback):
         if callback is None:
@@ -204,7 +213,7 @@ class GstMedia():
 
         sort_target = (1 if 0 == (int(desc["id"][-1]) % 2) else 2)
         pipe = '''
-                uridecodebin uri=%s caps=video/x-h264 ! queue max-size-buffers=3 ! h264parse ! v4l2h264dec capture-io-mode=5 ! video/x-raw,format=NV12 !
+                uridecodebin uri=%s caps=video/x-h264 ! queue max-size-buffers=3 ! h264parse ! v4l2h264dec capture-io-mode=5 ! video/x-raw,format=NV12 ! identity name=eos !
                 tiovxmultiscaler target=VPAC_MSC%d name=multi sink::pool-size=5 src_0::pool-size=2 src_1::pool-size=2
                 multi.src_0 ! queue max-size-buffers=3 ! video/x-raw,width=%d,height=%d ! tiovxcolorconvert target=DSP-%d in-pool-size=2 out-pool-size=2 ! video/x-raw,format=RGB ! perf ! appsink sync=true async=false sync=true max-buffers=2 qos=false emit-signals=true drop=true name=%s
                 multi.src_1 ! queue max-size-buffers=3 ! video/x-raw,width=%d,height=%d ! tiovxdlpreproc target=DSP-%d in-pool-size=2 out-pool-size=2 qos=false mean-0=%f mean-1=%f mean-2=%f scale-0=%f scale-1=%f scale-2=%f data-type=float32 channel-order=%s tensor-format=rgb ! application/x-tensor-tiovx !
