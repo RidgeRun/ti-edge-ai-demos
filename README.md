@@ -24,6 +24,11 @@ sudo python3 setup.py develop
 ```
 
 ## Running the Demo
+Make sure you disable the display background by running:
+```bash
+killall weston
+```
+Run the demo
 ```bash
 smartcity.py
 ```
