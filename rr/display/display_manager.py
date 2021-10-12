@@ -8,7 +8,7 @@ from rr.gstreamer.gst_media import GstMedia
 from rr.gstreamer.gst_media import GstMediaError
 
 w = 320
-h = 240
+h = 320
 img_format = 'RGB'
 
 MAX_STREAMS = 8
@@ -138,10 +138,10 @@ class DisplayManager():
         desc += xpos_desc
         desc += ypos_desc
 
-        desc += " ! kmssink force-modesetting=true sync=false async=false qos=false "
+        desc += " ! identity name=eos ! videoscale ! kmssink force-modesetting=true sync=false async=false qos=false "
 
         for key in self._list:
-            desc += " appsrc is-live=true do-timestamp=true name=%s format=time ! video/x-raw,width=%s,height=%s,framerate=30/1,pixel-aspect-ratio=1/1,format=RGB ! mixer. " % (
+            desc += " appsrc is-live=true do-timestamp=true name=%s format=time ! queue max-size-buffers=5 leaky=2 ! video/x-raw,width=%s,height=%s,framerate=30/1,pixel-aspect-ratio=1/1,format=RGB ! mixer. " % (
                 key, str(w), str(h))
 
         self._display_desc = desc

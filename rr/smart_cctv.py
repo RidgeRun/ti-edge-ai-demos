@@ -3,6 +3,7 @@
 #  Authors: Daniel Chaves <daniel.chaves@ridgerun.com>
 #           Marisol Zeledon <marisol.zeledon@ridgerun.com>
 
+from bin.utils.getconfig import GetConfigYaml
 from rr.actions.action_manager import ActionManager
 from rr.actions.action_manager import Action, ActionError
 from rr.actions.action_manager import Filter, FilterError
@@ -15,6 +16,17 @@ from rr.display.display_manager import DisplayManager
 
 
 class SmartCCTV:
+    def _parse_configs(self, config):
+        def configs(): return None
+
+        model_params = self._parse_model_params(config)
+        configs.model_params = config['model_params']
+
+        model_dir = model_params['model']['detection']
+        configs.ai_model = GetConfigYaml(model_dir)
+
+        return configs
+
     def _parse_model_params(self, config):
         model_params = config['model_params']
         return model_params
@@ -52,9 +64,10 @@ class SmartCCTV:
         actions = self._parse_actions(config)
         triggers = self._parse_triggers(config, actions, filters)
 
+        configs = self._parse_configs(config)
         streams = []
         for stream in config['streams']:
-            streams.append(GstMedia.make(stream, triggers))
+            streams.append(GstMedia.make(stream, triggers, configs))
 
         return streams
 

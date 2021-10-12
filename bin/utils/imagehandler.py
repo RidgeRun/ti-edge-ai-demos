@@ -43,9 +43,23 @@ class ImageHandler:
             logging.error("Unable to resize image")
             sys.exit(1)
 
+    def image_to_tensor(image, data_type=np.uint8):
+        image_array = np.asarray(image)
+        tensor = np.expand_dims(image_array, axis=0)
+        tensor = tensor.astype(data_type)
+
+        return tensor
+
     def buffer_to_np_array(data, width, height):
         img = np.ndarray(shape=(height, width, default_dimentions),
                          dtype=np.uint8,
                          buffer=data)
 
         return img
+
+    def buffer_to_tensor(data, width, height):
+        tensor = np.ndarray(shape=(1, height, width, default_dimentions),
+                            dtype=np.float32,
+                            buffer=data)
+
+        return tensor

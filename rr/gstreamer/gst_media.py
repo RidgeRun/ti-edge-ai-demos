@@ -10,7 +10,10 @@ gi.require_version('GLib', '2.0')  # nopep8
 from gi.repository import Gst as gst  # nopep8
 from gi.repository import GLib  # nopep8
 
+from bin.utils.getconfig import GetConfigYaml
 
+image_appsink_name = "image_appsink"
+tensor_appsink_name = "tensor_appsink"
 SECONDS_TO_NANOSECONDS = 1000000000
 
 
@@ -51,7 +54,8 @@ class GstMedia():
 
         self._name = None
         self._pipeline = None
-        self.callback = None
+        self.image_callback = None
+        self.tensor_callback = None
         self.callback_sample = None
         self._triggers = []
 
@@ -66,6 +70,10 @@ class GstMedia():
         GstMediaError
             If the description fails to create the media
         """
+
+        print ("Creating media:")
+        print ("   Name: " + name)
+        print ("   Description: " + desc)
 
         try:
             self._pipeline = gst.parse_launch(desc)
@@ -94,7 +102,7 @@ class GstMedia():
             raise GstMediaError("Unable to play the media")
 
         # Install the buffer callback that passes the image media to a client
-        if self.callback is not None:
+        if self.image_callback is not None:
             self.install_buffer_callback()
 
     def stop_media(self):
@@ -105,30 +113,34 @@ class GstMedia():
             If couldn't set the media state to stopped
         """
 
+        print ("Stopping media: " + self._name)
         # Nothing to be done if the pipe is not running
-        print("Stopping media...")
         ret, current, pending = self._pipeline.get_state(gst.CLOCK_TIME_NONE)
         if current != gst.State.PLAYING:
             return
 
         # Send an EOS and wait 5 seconds for the EOS to arrive before closing
-        timeout = 5 * SECONDS_TO_NANOSECONDS
-        self._pipeline.send_event(gst.Event.new_eos())
+        timeout = 3 * SECONDS_TO_NANOSECONDS
+        print ("Sending EOS: " + self._name)
+        eos = self._pipeline.get_by_name("eos")
+        eos.send_event(gst.Event.new_eos())
         self._pipeline.get_bus().timed_pop_filtered(timeout, gst.MessageType.EOS)
 
+        print ("Setting pipeline to NULL: " + self._name)
         ret = self._pipeline.set_state(gst.State.NULL)
         if gst.StateChangeReturn.FAILURE == ret:
             raise GstMediaError("Unable to stop the media")
+        print ("Media Stopped: " + self._name)
 
-    def install_callback(self, callback):
+    def install_image_callback(self, callback):
         if callback is None:
             raise GstMediaError("Invalid callback")
 
-        self.callback = callback
+        self.image_callback = callback
 
     def install_buffer_callback(self):
         try:
-            appsink = self._pipeline.get_by_name("appsink")
+            appsink = self._pipeline.get_by_name(image_appsink_name)
             appsink.connect("new-sample", self._on_new_buffer, appsink)
 
         except AttributeError as e:
@@ -150,7 +162,23 @@ class GstMedia():
             sample,
             self)
 
-        self.callback(gst_image)
+        # Bind the tensor pull
+        tensor_appsink = self._pipeline.get_by_name(tensor_appsink_name)
+        tensor_sample = tensor_appsink.emit("pull-sample")
+
+        tensor_caps = tensor_sample.get_caps()
+        tensor_width = tensor_caps.get_structure(0).get_value("tensor-width")
+        tensor_height = tensor_caps.get_structure(0).get_value("tensor-height")
+        tensor_format = tensor_caps.get_structure(0).get_value("tensor-format")
+
+        gst_tensor = GstImage(
+            tensor_width,
+            tensor_height,
+            tensor_format,
+            tensor_sample,
+            self)
+
+        self.image_callback(gst_image, gst_tensor)
 
         return gst.FlowReturn.OK
 
@@ -171,13 +199,37 @@ class GstMedia():
         return self._triggers
 
     @classmethod
-    def make(cls, desc, all_triggers):
-        pipe = '''uridecodebin uri=%s caps=video/x-h264 ! queue !
-                  h264parse ! v4l2h264dec capture-io-mode=5 ! video/x-raw,format=NV12 ! queue !
-                  tiovxmultiscaler  src_0::pool-size=8 sink::pool-size=8 ! tiovxcolorconvert out-pool-size=8 !
-                  video/x-raw,width=320,height=240,format=RGB ! queue !
-                  appsink sync=true qos=false emit-signals=true drop=true max-buffers=3 name=appsink''' % (
-            desc["uri"])
+    def make(cls, desc, all_triggers, configs):
+        # Parse parameters from model
+        model_resize = configs.ai_model.params.resize
+        model_mean = configs.ai_model.params.mean
+        model_scale = configs.ai_model.params.scale
+        model_channel_format = configs.ai_model.params.data_layout
+        model_channel_axis = configs.ai_model.params.data_layout.index('C')
+
+        # Parse parameters from server model params
+        disp_w = configs.model_params['disp_width']
+        disp_h = configs.model_params['disp_height']
+
+        sort_target = (1 if 0 == (int(desc["id"][-1]) % 2) else 2)
+        pipe = '''
+                uridecodebin uri=%s caps=video/x-h264 ! queue max-size-buffers=3 ! h264parse ! v4l2h264dec capture-io-mode=5 ! video/x-raw,format=NV12 ! identity name=eos !
+                tiovxmultiscaler target=VPAC_MSC%d name=multi sink::pool-size=5 src_0::pool-size=2 src_1::pool-size=2
+                multi.src_0 ! queue max-size-buffers=3 ! video/x-raw,width=%d,height=%d ! tiovxcolorconvert target=DSP-%d in-pool-size=2 out-pool-size=2 ! video/x-raw,format=RGB ! perf ! appsink sync=true async=false sync=true max-buffers=2 qos=false emit-signals=true drop=true name=%s
+                multi.src_1 ! queue max-size-buffers=3 ! video/x-raw,width=%d,height=%d ! tiovxdlpreproc target=DSP-%d in-pool-size=2 out-pool-size=2 qos=false mean-0=%f mean-1=%f mean-2=%f scale-0=%f scale-1=%f scale-2=%f data-type=float32 channel-order=%s tensor-format=rgb ! application/x-tensor-tiovx !
+                perf ! appsink sync=true async=false max-buffers=2 qos=false emit-signals=true drop=true name=%s
+               ''' % (desc["uri"],
+                      sort_target,
+                      *(model_resize),
+                      sort_target,
+                      image_appsink_name,
+                      *(model_resize),
+                      sort_target,
+                      *(model_mean),
+                      *(model_scale),
+                      model_channel_format.lower(),
+                      tensor_appsink_name)
+
         media = GstMedia()
         media.create_media(desc['id'], pipe)
 
@@ -198,7 +250,13 @@ class GstMedia():
 
 
 class GstImage():
-    def __init__(self, width, height, format, sample, gst_media_obj):
+    def __init__(
+            self,
+            width,
+            height,
+            format,
+            sample,
+            gst_media_obj):
         self.sample = sample
         self.gst_media_obj = gst_media_obj
 

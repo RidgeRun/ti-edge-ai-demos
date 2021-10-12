@@ -1,31 +1,14 @@
 model_params:
   disp_width: 320
-  disp_height: 320
+  disp_height: 240
   model:
     detection: '/opt/model_zoo/TFL-OD-2080-ssd-mobV2-fpnlite-coco-tpu-8-320x320/'
 
 streams:
   - id: "stream0"
-    uri: 'http://packages.ridgerun.com/ti-edgeai/videos/smart_city_chicago.mp4'
-    triggers:
-      - vehicle_logging
-      - person_recording
-
-  - id: "stream1"
-    uri: 'http://packages.ridgerun.com/ti-edgeai/videos/smart_city_dubai.mp4'
-    triggers:
-      - traffic_sign_logging
-
-  - id: "stream2"
-    uri: 'http://packages.ridgerun.com/ti-edgeai/videos/smart_city_vancouver.mp4'
-    triggers:
-      - vehicle_logging
-      - person_recording
-
-  - id: "stream3"
     uri: 'http://packages.ridgerun.com/ti-edgeai/videos/smart_city_new_york.mp4'
     triggers:
-      - traffic_sign_logging
+      - person_logging
 
 filters:
   - name: truck_filter
@@ -52,7 +35,7 @@ filters:
   - name: person_filter
     labels:
       - person/person
-    threshold: 0.8
+    threshold: 0.7
 
 actions:
   - name: record_event
@@ -65,12 +48,10 @@ actions:
     location: /tmp/log.csv
 
 triggers:
-  - name: vehicle_logging
+  - name: person_logging
     action: log_event
     filters:
-      - car_filter
-      - motorcycle_filter
-      - truck_filter
+      - person_filter
 
   - name: person_recording
     action: record_event

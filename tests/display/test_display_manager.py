@@ -13,14 +13,31 @@ from gi.repository import GLib
 import unittest
 from unittest.mock import MagicMock
 
+from bin.utils.getconfig import GetConfigYaml
+from rr.config.app_config_loader import AppConfigLoader
 from rr.actions.action_manager import Trigger
 from rr.display.display_manager import DisplayManager
 from rr.display.display_manager import DisplayManagerError
 from rr.gstreamer.gst_media import GstMedia
 
+default_config_file = 'config.yaml'
+default_model_key = 'detection'
+
 
 def _get_media_State(media):
     return media.get_state(gst.CLOCK_TIME_NONE)[1]
+
+
+def _parsed_configuration():
+    def configs(): return None
+    config_obj = AppConfigLoader()
+    config_dict = config_obj.load(default_config_file)
+
+    configs.model_params = config_dict['model_params']
+    model_dir = configs.model_params['model'][default_model_key]
+    configs.ai_model = GetConfigYaml(model_dir)
+
+    return configs
 
 
 def _create_stream(id, trigger_list):
@@ -31,7 +48,9 @@ def _create_stream(id, trigger_list):
         "triggers": ["trigger_name"]
     }
 
-    return GstMedia.make(stream_desc, trigger_list)
+    # Mock a configuration
+    configs = _parsed_configuration()
+    return GstMedia.make(stream_desc, trigger_list, configs)
 
 
 class MockTriggerAction:
@@ -82,7 +101,8 @@ class TestDisplayManager(unittest.TestCase):
             "triggers": ["trigger_name"]
         }
 
-        self.stream = GstMedia.make(self.stream_desc, [trigger])
+        configs = _parsed_configuration()
+        self.stream = GstMedia.make(self.stream_desc, [trigger], configs)
 
         self.display_manager.add_stream(self.stream)
         self.display_media = self.display_manager._get_media()
@@ -97,11 +117,10 @@ class TestDisplayManager(unittest.TestCase):
         self.assertTrue(self.stream.get_name() not in list)
 
     def test_create_display(self):
-        display_desc = 'videomixer name=mixer  sink_0::xpos=0 sink_0::ypos=0 ! queue ! videoconvert ! videoscale ! video/x-raw,width=1280,height=720 ! kmssink force-modesetting=true sync=false async=false qos=false  appsrc do-timestamp=true name=stream0 format=time ! queue ! video/x-raw,width=320,height=240,format=RGB,framerate=30/1,pixel-aspect-ratio=1/1 ! videoconvert ! videoscale ! video/x-raw,width=320,height=240 ! mixer. '
         self.display_manager.create_display()
-        self.assertEqual(
-            display_desc,
-            self.display_manager._get_display_desc())
+
+        media_obj = self.display_manager._get_media()
+        self.assertEqual("display", media_obj.get_name())
 
     def test_play_display(self):
         self.test_create_display()
@@ -154,7 +173,8 @@ class TestDisplayManagerFail(unittest.TestCase):
             "triggers": ["trigger_name"]
         }
 
-        self.stream = GstMedia.make(self.stream_desc, [self.trigger])
+        configs = _parsed_configuration()
+        self.stream = GstMedia.make(self.stream_desc, [self.trigger], configs)
 
         self.display_manager.add_stream(self.stream)
 

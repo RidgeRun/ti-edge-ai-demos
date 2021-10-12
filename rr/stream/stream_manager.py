@@ -15,9 +15,13 @@ class OnNewImage():
         self.disp_width = disp_width
         self.disp_height = disp_height
 
-    def __call__(self, image):
+    def __call__(self, gst_image, gst_tensor):
         self.ai_manager.process_image(
-            image, self.model, self.disp_width, self.disp_height)
+            gst_image,
+            gst_tensor,
+            self.model,
+            self.disp_width,
+            self.disp_height)
 
 
 class OnNewPrediction():
@@ -65,17 +69,19 @@ class StreamManager():
         self.display_manager = display_manager
 
         cb_prediction = OnNewPrediction(action_manager, display_manager)
-        cb = {}
+        cb_image = {}
         for key in ai_manager_dict:
-            cb.update({key: OnNewImage(
+            on_new_image_cb = {key: OnNewImage(
                 ai_manager_dict[key],
                 model,
                 disp_width,
-                disp_height)})
+                disp_height)}
+
+            cb_image.update(on_new_image_cb)
 
             self.ai_manager_dict[key].install_callback(cb_prediction)
 
-        self.media_manager.install_callbacks(cb)
+        self.media_manager.install_image_callback(cb_image)
 
     def play(self):
         """
@@ -95,8 +101,8 @@ class StreamManager():
         """
 
         try:
-            self.display_manager.stop_display()
             self.media_manager.stop_media()
+            self.display_manager.stop_display()
 
         except Exception as e:
             raise StreamManagerError("Unable to stop the stream") from e
