@@ -97,6 +97,7 @@ class GstMedia():
             If couldn't set the media state to playing
         """
 
+        print ("Playing media: " + self._name)
         ret = self._pipeline.set_state(gst.State.PLAYING)
         if gst.StateChangeReturn.FAILURE == ret:
             raise GstMediaError("Unable to play the media")
