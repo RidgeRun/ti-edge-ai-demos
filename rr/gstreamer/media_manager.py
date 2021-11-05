@@ -118,6 +118,10 @@ class MediaManager():
                 self._Dict[key].stop_media()
             except MediaError as e:
                 raise MediaManagerError("Unable to stop media") from e
+            try:
+                self._Dict[key].delete_media()
+            except MediaError as e:
+                raise MediaManagerError("Unable to delete media") from e
 
     def install_image_callback(self, callback):
         for key, MediaObjects in self._Dict.items():

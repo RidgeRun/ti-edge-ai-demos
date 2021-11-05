@@ -127,21 +127,21 @@ class DisplayManager():
         if 0 == len(self._list):
             raise DisplayManagerError("No streams added")
 
-        desc = "videomixer name=mixer "
+        desc = "tiovxmosaic name=mixer "
         xpos_desc = ""
         ypos_desc = ""
 
         for i in range(len(self._list)):
-            xpos_desc += " sink_" + str(i) + "::xpos=" + str(xpos[i])
-            ypos_desc += " sink_" + str(i) + "::ypos=" + str(ypos[i])
+            xpos_desc += " sink_" + str(i) + "::startx=" + str(xpos[i])
+            ypos_desc += " sink_" + str(i) + "::starty=" + str(ypos[i])
 
         desc += xpos_desc
         desc += ypos_desc
 
-        desc += " ! identity name=eos ! videoscale ! kmssink force-modesetting=true sync=false async=false qos=false "
+        desc += " ! identity name=eos ! video/x-raw,width=1280,height=720 ! perf name=perf_kmssink ! kmssink force-modesetting=true sync=false async=false qos=false "
 
         for key in self._list:
-            desc += " appsrc is-live=true do-timestamp=true name=%s format=time ! queue max-size-buffers=5 leaky=2 ! video/x-raw,width=%s,height=%s,framerate=30/1,pixel-aspect-ratio=1/1,format=RGB ! mixer. " % (
+            desc += " appsrc is-live=true do-timestamp=true name=%s format=time ! queue max-size-buffers=5 leaky=2 ! video/x-raw,width=%s,height=%s,framerate=30/1,pixel-aspect-ratio=1/1,format=RGB !  tiovxcolorconvert ! video/x-raw,format=NV12 ! mixer. " % (
                 key, str(w), str(h))
 
         self._display_desc = desc
