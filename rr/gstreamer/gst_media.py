@@ -97,6 +97,7 @@ class GstMedia():
             If couldn't set the media state to playing
         """
 
+        print ("Playing media: " + self._name)
         ret = self._pipeline.set_state(gst.State.PLAYING)
         if gst.StateChangeReturn.FAILURE == ret:
             raise GstMediaError("Unable to play the media")
@@ -213,21 +214,23 @@ class GstMedia():
 
         sort_target = (1 if 0 == (int(desc["id"][-1]) % 2) else 2)
         pipe = '''
-                uridecodebin uri=%s caps=video/x-h264 ! queue max-size-buffers=3 ! h264parse ! v4l2h264dec capture-io-mode=5 ! video/x-raw,format=NV12 ! identity name=eos !
-                tiovxmultiscaler target=VPAC_MSC%d name=multi sink::pool-size=5 src_0::pool-size=2 src_1::pool-size=2
-                multi.src_0 ! queue max-size-buffers=3 ! video/x-raw,width=%d,height=%d ! tiovxcolorconvert target=DSP-%d in-pool-size=2 out-pool-size=2 ! video/x-raw,format=RGB ! perf ! appsink sync=true async=false sync=true max-buffers=2 qos=false emit-signals=true drop=true name=%s
-                multi.src_1 ! queue max-size-buffers=3 ! video/x-raw,width=%d,height=%d ! tiovxdlpreproc target=DSP-%d in-pool-size=2 out-pool-size=2 qos=false mean-0=%f mean-1=%f mean-2=%f scale-0=%f scale-1=%f scale-2=%f data-type=float32 channel-order=%s tensor-format=rgb ! application/x-tensor-tiovx !
-                perf ! appsink sync=true async=false max-buffers=2 qos=false emit-signals=true drop=true name=%s
+                uridecodebin uri=%s caps=video/x-h264 ! queue max-size-buffers=3 ! h264parse ! v4l2h264dec capture-io-mode=5 ! video/x-raw,format=NV12 ! identity name=eos ! queue max-size-buffers=3 leaky=2 !
+                tiovxmultiscaler target=VPAC_MSC%d name=multi sink::pool-size=5 src_0::pool-size=4 src_1::pool-size=4
+                multi.src_0 ! queue max-size-buffers=3 leaky=2 ! video/x-raw,width=%d,height=%d ! tiovxcolorconvert target=DSP-%d in-pool-size=2 out-pool-size=4 ! video/x-raw,format=RGB ! perf name=perf_image_%s ! appsink sync=true async=false sync=true max-buffers=2 qos=false emit-signals=true drop=true name=%s
+                multi.src_1 ! queue max-size-buffers=3 leaky=2 ! video/x-raw,width=%d,height=%d ! tiovxdlpreproc target=DSP-%d in-pool-size=4 out-pool-size=4 qos=false mean-0=%f mean-1=%f mean-2=%f scale-0=%f scale-1=%f scale-2=%f data-type=float32 channel-order=%s tensor-format=rgb ! application/x-tensor-tiovx !
+                perf name=perf_tensor_%s ! appsink sync=true async=false max-buffers=2 qos=false emit-signals=true drop=true name=%s
                ''' % (desc["uri"],
                       sort_target,
                       *(model_resize),
                       sort_target,
+                      desc["id"],
                       image_appsink_name,
                       *(model_resize),
                       sort_target,
                       *(model_mean),
                       *(model_scale),
                       model_channel_format.lower(),
+                      desc["id"],
                       tensor_appsink_name)
 
         media = GstMedia()

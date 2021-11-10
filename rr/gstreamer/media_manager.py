@@ -4,6 +4,7 @@
 #  Authors: Daniel Chaves <daniel.chaves@ridgerun.com>
 #           Marisol Zeledon <marisol.zeledon@ridgerun.com>
 
+import time
 from rr.gstreamer.gst_media import GstMediaError as MediaError
 
 
@@ -101,6 +102,8 @@ class MediaManager():
         for key in self._Dict:
             try:
                 self._Dict[key].play_media()
+                # Let each stream set up and start one by one
+                time.sleep(0.5)
             except MediaError as e:
                 raise MediaManagerError("Unable to start media") from e
 
@@ -118,6 +121,10 @@ class MediaManager():
                 self._Dict[key].stop_media()
             except MediaError as e:
                 raise MediaManagerError("Unable to stop media") from e
+            try:
+                self._Dict[key].delete_media()
+            except MediaError as e:
+                raise MediaManagerError("Unable to delete media") from e
 
     def install_image_callback(self, callback):
         for key, MediaObjects in self._Dict.items():
