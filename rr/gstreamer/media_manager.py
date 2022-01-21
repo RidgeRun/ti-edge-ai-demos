@@ -7,6 +7,8 @@
 import time
 from rr.gstreamer.gst_media import GstMediaError as MediaError
 
+STREAM_START_DELAY_INTERVAL = 0.5
+
 
 class MediaManagerError(RuntimeError):
     pass
@@ -37,16 +39,17 @@ class MediaManager():
 
     """
 
-    def __init__(self):
+    def __init__(self, stream):
         """
         Constructor for the Media Gstreamer Manager object
         """
 
-        self._Dict = {}
+        self._stream = stream
+        self._appsink_dict = {}
 
         self.callback = None
 
-    def add_media(self, key, media):
+    def add_media(self, key, appsink):
         """Install a new media into a dictionary
 
         Parameters
@@ -60,10 +63,10 @@ class MediaManager():
             If the description fails to insert the media
         """
 
-        if (key is None) or (media is None):
+        if (key is None) or (appsink is None):
             raise MediaManagerError("Invalid key or media")
 
-        self._Dict.update({key: media})
+        self._appsink_dict.update({key: appsink})
 
     def remove_media(self, key):
         """Remove media from dictionary
@@ -82,13 +85,10 @@ class MediaManager():
         if key is None:
             raise MediaManagerError("Invalid key")
 
-        if key not in self._Dict:
+        if key not in self._appsink_dict:
             raise MediaManagerError("Unable to find the key in the dictionary")
 
-        if self._Dict[key] is not None:
-            self._Dict[key] = None
-
-        self._Dict.pop(key)
+        self._appsink_dict.pop(key)
 
     def play_media(self):
         """Start the medias from dictionary
@@ -99,13 +99,18 @@ class MediaManager():
             If the description fails to play the medias
         """
 
-        for key in self._Dict:
+        for appsink in self._appsink_dict.values():
             try:
-                self._Dict[key].play_media()
-                # Let each stream set up and start one by one
-                time.sleep(0.5)
+                appsink.play_media()
+                time.sleep(STREAM_START_DELAY_INTERVAL)
             except MediaError as e:
                 raise MediaManagerError("Unable to start media") from e
+
+        try:
+            self._stream.play_media()
+            time.sleep(STREAM_START_DELAY_INTERVAL)
+        except MediaError as e:
+            raise MediaManagerError("Unable to start media") from e
 
     def stop_media(self):
         """Stop the medias from dictionary
@@ -116,23 +121,29 @@ class MediaManager():
             If the description fails to stop the medias
         """
 
-        for key in self._Dict:
+        for appsink in self._appsink_dict.values():
             try:
-                self._Dict[key].stop_media()
+                appsink.stop_media()
             except MediaError as e:
                 raise MediaManagerError("Unable to stop media") from e
             try:
-                self._Dict[key].delete_media()
+                appsink.delete_media()
             except MediaError as e:
                 raise MediaManagerError("Unable to delete media") from e
 
+        try:
+            self._stream.stop_media()
+            time.sleep(STREAM_START_DELAY_INTERVAL)
+        except MediaError as e:
+            raise MediaManagerError("Unable to start media") from e
+
     def install_image_callback(self, callback):
-        for key, MediaObjects in self._Dict.items():
+        for key, appsink in self._appsink_dict.items():
             try:
-                MediaObjects.install_image_callback(callback[key])
+                appsink.install_image_callback(callback[key])
             except MediaError as e:
                 raise MediaManagerError(
                     "Unable to install the image callback") from e
 
     def _get_media_dict(self):
-        return self._Dict
+        return self._appsink_dict

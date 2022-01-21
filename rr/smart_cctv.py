@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-#  Copyright (C) 2021 RidgeRun, LLC (http://www.ridgerun.com)
+#  Copyright (C) 2021-2022 RidgeRun, LLC (http://www.ridgerun.com)
 #  Authors: Daniel Chaves <daniel.chaves@ridgerun.com>
 #           Marisol Zeledon <marisol.zeledon@ridgerun.com>
+#           Emmanuel Madrigal <emmanuel.madrigal@ridgerun.com>
+
+from typing import List
 
 from bin.utils.getconfig import GetConfigYaml
 from rr.actions.action_manager import ActionManager
@@ -9,7 +12,10 @@ from rr.actions.action_manager import Action, ActionError
 from rr.actions.action_manager import Filter, FilterError
 from rr.actions.action_manager import Trigger, TriggerError
 from rr.ai.ai_manager import AIManagerOnNewImage
-from rr.gstreamer.gst_media import GstMedia
+from rr.gstreamer.gst_input import GstInput
+from rr.gstreamer.gst_stream import GstStream
+from rr.gstreamer.gst_preproc import GstPreProc
+from rr.gstreamer.gst_appsink import GstAppSink
 from rr.gstreamer.media_manager import MediaManager
 from rr.stream.stream_manager import StreamManager
 from rr.display.display_manager import DisplayManager
@@ -65,17 +71,22 @@ class SmartCCTV:
         triggers = self._parse_triggers(config, actions, filters)
 
         configs = self._parse_configs(config)
-        streams = []
-        for stream in config['streams']:
-            streams.append(GstMedia.make(stream, triggers, configs))
 
-        return streams
+        stream = GstStream.make(config['streams'], configs)
 
-    def _create_media_manager(self, streams):
-        media_manager = MediaManager()
+        appsinks = []
+        for desc in config['streams']:
+            appsinks.append(GstAppSink.make(desc, triggers))
 
-        for stream in streams:
-            media_manager.add_media(stream.get_name(), stream)
+        input = GstInput(stream, appsinks)
+
+        return input
+
+    def _create_media_manager(self, stream, appsinks):
+        media_manager = MediaManager(stream)
+
+        for appsink in appsinks:
+            media_manager.add_media(appsink.get_name(), appsink)
 
         return media_manager
 
@@ -104,9 +115,9 @@ class SmartCCTV:
             ai_manager_dict.update(
                 {key['id']: self._create_ai_manager(config)})
 
-        streams = self._create_streams(config)
-        media_manager = self._create_media_manager(streams)
-        display_manager = self._create_display_manager(streams)
+        input = self._create_streams(config)
+        media_manager = self._create_media_manager(input.stream, input.appsink)
+        display_manager = self._create_display_manager(input.appsink)
         action_manager = self._create_action_manager()
 
         self._stream_manager = StreamManager(

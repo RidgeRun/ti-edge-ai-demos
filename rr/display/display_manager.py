@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-#  Copyright (C) 2021 RidgeRun, LLC (http://www.ridgerun.com)
+#  Copyright (C) 2021-2022 RidgeRun, LLC (http://www.ridgerun.com)
 #  Authors: Daniel Chaves <daniel.chaves@ridgerun.com>
 #           Marisol Zeledon <marisol.zeledon@ridgerun.com>
+#           Emmanuel Madrigal <emmanuel.madrigal@ridgerun.com>
 
 from rr.gstreamer.gst_media import GstMedia
 from rr.gstreamer.gst_media import GstMediaError
@@ -127,7 +128,7 @@ class DisplayManager():
         if 0 == len(self._list):
             raise DisplayManagerError("No streams added")
 
-        desc = "tiovxmosaic name=mixer "
+        desc = "tiovxmosaic name=mixer  target=VPAC_MSC2"
         xpos_desc = ""
         ypos_desc = ""
 
@@ -141,8 +142,10 @@ class DisplayManager():
         desc += " ! identity name=eos ! video/x-raw,width=1280,height=720 ! perf name=perf_kmssink ! kmssink force-modesetting=true sync=false async=false qos=false "
 
         for key in self._list:
-            desc += " appsrc is-live=true do-timestamp=true name=%s format=time ! queue max-size-buffers=5 leaky=2 ! video/x-raw,width=%s,height=%s,framerate=30/1,pixel-aspect-ratio=1/1,format=RGB !  tiovxcolorconvert ! video/x-raw,format=NV12 ! mixer. " % (
-                key, str(w), str(h))
+            desc += " appsrc is-live=true do-timestamp=true name={} format=time ! queue max-size-buffers=5 leaky=2 ! video/x-raw,width={},height={},framerate=30/1,pixel-aspect-ratio=1/1,format=RGB ! videoconvert ! video/x-raw,format=NV12 ! mixer. ".format(
+                key,
+                w,
+                h)
 
         self._display_desc = desc
         self._media.create_media("display", self._display_desc)

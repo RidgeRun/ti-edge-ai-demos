@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-#  Copyright (C) 2021 RidgeRun, LLC (http://www.ridgerun.com)
+#  Copyright (C) 2021-2022 RidgeRun, LLC (http://www.ridgerun.com)
 #  Authors: Daniel Chaves <daniel.chaves@ridgerun.com>
 #           Marisol Zeledon <marisol.zeledon@ridgerun.com>
+#           Emmanuel Madrigal <emmanuel.madrigal@ridgerun.com>
 
 import cv2
 import numpy as np
