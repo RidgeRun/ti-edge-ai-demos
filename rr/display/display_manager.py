@@ -128,24 +128,32 @@ class DisplayManager():
         if 0 == len(self._list):
             raise DisplayManagerError("No streams added")
 
-        desc = "tiovxmosaic name=mixer  target=VPAC_MSC2"
-        xpos_desc = ""
-        ypos_desc = ""
-
-        for i in range(len(self._list)):
-            xpos_desc += " sink_" + str(i) + "::startx=" + str(xpos[i])
-            ypos_desc += " sink_" + str(i) + "::starty=" + str(ypos[i])
-
-        desc += xpos_desc
-        desc += ypos_desc
-
-        desc += " ! identity name=eos ! video/x-raw,width=1280,height=720 ! perf name=perf_kmssink ! kmssink force-modesetting=true sync=false async=false qos=false "
+        desc = '''
+        tiovxmux name=mux tiovxdemux name=demux'''
 
         for key in self._list:
-            desc += " appsrc is-live=true do-timestamp=true name={} format=time ! queue max-size-buffers=5 leaky=2 ! video/x-raw,width={},height={},framerate=30/1,pixel-aspect-ratio=1/1,format=RGB ! videoconvert ! video/x-raw,format=NV12 ! mixer. ".format(
+            desc += '''
+            appsrc is-live=true do-timestamp=true name={} format=time ! queue max-size-buffers=5 leaky=2 ! video/x-raw,width={},height={},framerate=30/1,pixel-aspect-ratio=1/1,format=RGB ! mux.
+            demux. ! queue max-size-buffers=1 leaky=2 ! mixer. '''.format(
                 key,
                 w,
                 h)
+
+        desc += '''
+        mux. ! tiovxcolorconvert ! video/x-raw(memory:batched),format=NV12 ! demux.'''
+
+        desc += '''
+        tiovxmosaic name=mixer target=VPAC_MSC2'''
+        for i in range(len(self._list)):
+            desc += '''
+            sink_{id}::startx={xpos} sink_{id}::starty={ypos}'''.format(
+                id=i,
+                xpos=xpos[i],
+                ypos=ypos[i],
+            )
+
+        desc += '''
+         ! identity name=eos ! video/x-raw,width=1280,height=720 ! perf name=perf_kmssink ! kmssink force-modesetting=true sync=false async=false qos=false '''
 
         self._display_desc = desc
         self._media.create_media("display", self._display_desc)

@@ -14,7 +14,6 @@ from rr.actions.action_manager import Trigger, TriggerError
 from rr.ai.ai_manager import AIManagerOnNewImage
 from rr.gstreamer.gst_input import GstInput
 from rr.gstreamer.gst_stream import GstStream
-from rr.gstreamer.gst_preproc import GstPreProc
 from rr.gstreamer.gst_appsink import GstAppSink
 from rr.gstreamer.media_manager import MediaManager
 from rr.stream.stream_manager import StreamManager

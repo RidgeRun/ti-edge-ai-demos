@@ -118,8 +118,9 @@ class GstMedia():
         timeout = 3 * SECONDS_TO_NANOSECONDS
         print("Sending EOS: " + self._name)
         eos = self._pipeline.get_by_name("eos")
-        eos.send_event(gst.Event.new_eos())
-        self._pipeline.get_bus().timed_pop_filtered(timeout, gst.MessageType.EOS)
+        if eos:
+            eos.send_event(gst.Event.new_eos())
+            self._pipeline.get_bus().timed_pop_filtered(timeout, gst.MessageType.EOS)
 
         print("Setting pipeline to NULL: " + self._name)
         ret = self._pipeline.set_state(gst.State.NULL)
@@ -145,7 +146,6 @@ class GstMedia():
         """
 
         return self._output_name
-
 
 class GstUtils():
     def __init__(self):
